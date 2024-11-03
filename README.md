@@ -1,3 +1,4 @@
+Opcional
 Requisitos: 
 - Java JDK 22
 Configuracion opcional en Intellij IDEA:
