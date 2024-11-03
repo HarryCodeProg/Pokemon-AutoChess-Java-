@@ -94,7 +94,7 @@ public class PokemonAutoChessGUI extends JFrame {
             //bancaYTablero.limpiarTableroEnemigo();
             tablero.limpiarTableroEnemigo();
             juego.subirRonda();
-            if(juego.getFase()>2 && juego.getRonda() == 5){
+            if(juego.getFase()>3 && juego.getRonda() == 5){
                 musicaDeFondo.detenerMusica();
                 cambiarMusica(direccionMusica.get("boss"));
             }

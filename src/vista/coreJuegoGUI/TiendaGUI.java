@@ -97,11 +97,16 @@ public class TiendaGUI {
 
     public void inicializarVenta(){
         venta = new JPanel();
+        ImageIcon im = new ImageIcon();
+        im.setImage(new ImageIcon("src/modelo/images/papelera.png").getImage().getScaledInstance(30, 30, Image.SCALE_DEFAULT));
+        JLabel ms = new JLabel("vender ficha");
+        ms.setForeground(Color.BLACK);
+        JLabel img = new JLabel(im);
+        venta.add(img);
+        venta.add(ms);
         venta.setBackground(Color.RED);
         venta.setOpaque(true);
         venta.setPreferredSize(new Dimension(20, 100));
-        /*venta.setVisible(false);
-        venta.setEnabled(false);*/
         venta.setVisible(true);
         venta.setEnabled(true);
         venta.addMouseListener(new MouseAdapter(){
