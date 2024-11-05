@@ -26,7 +26,6 @@ public class Juego {
         this.tienda = tienda;
         this.banca = ban;
         this.tablero = tab;
-        //this.bancaYTablero = baYTa;
         inicializarComponentes();
         setXpNecesaria();
     }
@@ -36,7 +35,7 @@ public class Juego {
     }
 
     public void inicializarComponentes() {
-        labelXP = new JLabel("XP: 0 / 2"); // Nivel inicial
+        labelXP = new JLabel("XP: 0 / 2");
         panelXP = new JPanel();
         panelXP.setLayout(new FlowLayout(FlowLayout.LEFT));
 
@@ -63,14 +62,12 @@ public class Juego {
         int xpActual = jugador.getXpActual();
         int xpNecesariaProximoNivel = xpNecesaria[nivelActual - 1]; // Restamos 1 al nivel para acceder al índice correcto
 
-        // Actualizar el texto de XP
         labelXP.setText("XP: " + xpActual + " / " + xpNecesariaProximoNivel);
         labelXP.setForeground(new Color(255, 255, 255, 220));
         labelXP.setBackground(new Color(0, 0, 0, 160));
         labelXP.setOpaque(true);
 
-        // Actualizar la barra de experiencia visual
-        panelXP.removeAll(); // Limpiar la barra antes de agregar los nuevos rectángulos
+        panelXP.removeAll();
 
         int numRectangulos = 10; // Supongamos que la barra se divide en 10 segmentos
         double ratioXP = (double) xpActual / xpNecesariaProximoNivel; // Proporción de XP acumulada
@@ -83,14 +80,14 @@ public class Juego {
                 rectangulo.setBackground(Color.LIGHT_GRAY); // Los vacíos de gris claro
             }
             rectangulo.setPreferredSize(new Dimension(15, 10)); // Dimensión de cada rectángulo
-            panelXP.add(rectangulo); // Agregar el rectángulo a la barra
+            panelXP.add(rectangulo);
         }
        }else{
            panelXP.removeAll();
            labelXP.removeAll();
        }
-        panelXP.revalidate(); // Validar
-        panelXP.repaint();    // Repintar
+        panelXP.revalidate();
+        panelXP.repaint();
     }
 
     public void comprarXP(int xp) {
@@ -152,13 +149,11 @@ public class Juego {
 
     public void agregarRattata(int cantidad){
         for (int i = 0; i <cantidad;i++){
-            //bancaYTablero.añadirAlTableroPorCoor(1,i,tienda.getRattata());
             tablero.añadirAlTableroPorCoor(1,i,tienda.getRattata());
         }
     }
 
     public void agregarRegigigas(){
-        //bancaYTablero.añadirAlTableroPorCoor(1,2,tienda.getRegigigas());
         tablero.añadirAlTableroPorCoor(1,2,tienda.getRegigigas());
     }
 

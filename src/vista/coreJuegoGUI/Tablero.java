@@ -87,7 +87,6 @@ public class Tablero extends JPanel{
         fichagui.setBanca(banca);
         this.celdasTablero[x][y].add(fichagui);
         fichagui.iniciarAnimacion();
-        //fichagui.animacionArriba();
     }
 
     public FichaClickeableGUI getFichaTablero(){
@@ -104,9 +103,8 @@ public class Tablero extends JPanel{
 
     private void moverFichaDentroDelTablero(JPanel celdaNueva) {
         if (fichaTablero != null) {
-            JPanel celdaAnterior = (JPanel) fichaTablero.getParent(); // Celda actual de la ficha seleccionada
+            JPanel celdaAnterior = (JPanel) fichaTablero.getParent();
 
-            // Intercambiar fichas si la nueva celda ya contiene una ficha
             if (celdaNueva.getComponentCount() > 0) {
                 // Tomar la ficha que ya está en la nueva celda
                 FichaClickeableGUI fichaEnNuevaCelda = (FichaClickeableGUI) celdaNueva.getComponent(0);
@@ -114,10 +112,7 @@ public class Tablero extends JPanel{
                 celdaNueva.remove(fichaEnNuevaCelda);
                 celdaAnterior.remove(fichaTablero);
 
-                // Colocar la ficha seleccionada en la nueva celda
                 celdaNueva.add(fichaTablero);
-
-                // Colocar la ficha que estaba en la nueva celda en la celda anterior
                 celdaAnterior.add(fichaEnNuevaCelda);
 
             } else {
@@ -132,13 +127,12 @@ public class Tablero extends JPanel{
             celdaNueva.revalidate();
             celdaNueva.repaint();
 
-            // Deseleccionar la ficha
             fichaTablero.setBorder(null);
             fichaTablero = null;
         }
     }
 
-    private void colocarFichaEnTablero(JPanel celdaTablero, int cantidadFichaMaximo) {
+    public void colocarFichaEnTablero(JPanel celdaTablero, int cantidadFichaMaximo) {
         int fichasActualesEnTablero = contarFichasEnTablero();
 
         // Verificar si ya se alcanzó el límite de fichas permitidas en el tablero
@@ -164,17 +158,27 @@ public class Tablero extends JPanel{
             banca.getFichaDeLaBanca().setBorder(null);
 
             if(!fichaEstaEnTablero(banca.getFichaDeLaBanca())){
-                actualizarContadorRasgos(banca.getFichaDeLaBanca().getFicha().getRasgo1());
-                actualizarContadorRasgos(banca.getFichaDeLaBanca().getFicha().getRasgo2());
-                actualizarContadorRasgos(banca.getFichaDeLaBanca().getFicha().getRasgo3());
+                agregarRasgosFicha(banca.getFichaDeLaBanca());
                 ordenarContadorRasgos();
-                actualizarRasgos();
-
             }
 
             fichaTablero = null;
             banca.fichaBancaSetNull();
         }
+    }
+
+    public void removerRasgosFicha(FichaClickeableGUI ficha){
+        removerContadorRasgos(ficha.getFicha().getRasgo1());
+        removerContadorRasgos(ficha.getFicha().getRasgo2());
+        removerContadorRasgos(ficha.getFicha().getRasgo3());
+        actualizarRasgos();
+    }
+
+    public void agregarRasgosFicha(FichaClickeableGUI ficha){
+        actualizarContadorRasgos(ficha.getFicha().getRasgo1());
+        actualizarContadorRasgos(ficha.getFicha().getRasgo2());
+        actualizarContadorRasgos(ficha.getFicha().getRasgo3());
+        actualizarRasgos();
     }
 
     public void removerContadorRasgos(Rasgo rasgo) {
@@ -218,17 +222,13 @@ public class Tablero extends JPanel{
                 if (celdasTablero[fila][columna].getComponentCount() > 0) {
                     FichaClickeableGUI fichaEnCelda = (FichaClickeableGUI) celdasTablero[fila][columna].getComponent(0);
 
-                    if (fichaEnCelda.getFicha().getNombreOriginal().equals(ficha.getFicha().getNombreOriginal())) {
+                    if (fichaEnCelda.getFicha().getNombreOriginal().equals(ficha.getFicha().getNombreOriginal()) || fichaEnCelda.getFicha().getNombre().equals(ficha.getFicha().getNombreOriginal())) {
                         contador++;
                     }
                 }
             }
         }
-        if (contador>=2){
-            return true;
-        }else{
-            return false;
-        }
+        return contador >= 2;
     }
 
     public void setCantidadMaximaTablero(int cantidad){
@@ -241,20 +241,23 @@ public class Tablero extends JPanel{
                 if (celdasTablero[fila][columna].getComponentCount() > 0) {
                     FichaClickeableGUI fichaEnCelda = (FichaClickeableGUI) celdasTablero[fila][columna].getComponent(0);
 
-                    if (fichaEnCelda.getFicha().getNombre().equals(ficha.getNombre())) {
-                        removerContadorRasgos(ficha.getRasgo1());
-                        removerContadorRasgos(ficha.getRasgo2());
-                        removerContadorRasgos(ficha.getRasgo3());
+                    //if (fichaEnCelda.getFicha().getNombre().equals(ficha.getNombre())) {
+                    if (fichaEnCelda.getFicha() == ficha) {
+                        FichaClickeableGUI gui = new FichaClickeableGUI(ficha);
+                        if(!fichaEstaEnTablero(gui) ){
+                           removerRasgosFicha(gui);
+                        }
                         actualizarRasgos();
                         celdasTablero[fila][columna].remove(fichaEnCelda);
                         celdasTablero[fila][columna].revalidate();
                         celdasTablero[fila][columna].repaint();
+                        this.fichaTablero = null;
                         return;
                     }
                 }
             }
         }
-        System.out.println("La ficha no se encontró en el tablero.");
+        //System.out.println("La ficha no se encontró en el tablero.");
     }
 
     public void limpiarTableroEnemigo() {

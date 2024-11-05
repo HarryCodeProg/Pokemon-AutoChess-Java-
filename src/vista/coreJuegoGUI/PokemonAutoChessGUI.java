@@ -75,7 +75,6 @@ public class PokemonAutoChessGUI extends JFrame {
         tablero.setBanca(banca);
         tienda.setBancaYTablero(banca,tablero);
 
-        //this.juego = new Juego(jugador, tienda, bancaYTablero);
         this.juego = new Juego(jugador, tienda, banca,tablero);
 
         panelConFondo.add(setupPanelIzquierdo(), BorderLayout.WEST);

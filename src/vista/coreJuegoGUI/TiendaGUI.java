@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class TiendaGUI {
+public class TiendaGUI extends JPanel{
     private List<String> direccionesImagenesRasgos = new ArrayList<>();
     private Tienda tienda;
     private Map<Rasgos, String> imagenesRasgos = new HashMap<>();
@@ -48,9 +48,7 @@ public class TiendaGUI {
             // Convertir el contenido a un objeto JSONObject
             JSONObject jsonFichas = new JSONObject(contenido);
 
-            // Asignar imágenes a las fichas
             for (Ficha ficha : this.tienda.getTodasLasFichas()) {
-                // Verificar si el nombre de la ficha existe en el JSON
                 if (jsonFichas.has(ficha.getNombre())) {
                     JSONArray imagenes = jsonFichas.getJSONArray(ficha.getNombre());
                     ficha.setCosteAnterior();
@@ -85,11 +83,9 @@ public class TiendaGUI {
                 }
             }
         } catch (IOException e) {
-            // Manejo de error al leer el archivo
             System.out.println("Error al leer el archivo JSON: " + e.getMessage());
             e.printStackTrace();
         } catch (JSONException e) {
-            // Manejo de error en la estructura del JSON
             System.out.println("Error al procesar el JSON: " + e.getMessage());
             e.printStackTrace();
         }
@@ -113,24 +109,18 @@ public class TiendaGUI {
             @Override
             public void mouseClicked(MouseEvent e) {
                     if (tienda.getBanca().getFichaDeLaBanca()!= null){
-                        tienda.getBanca().eliminarFichaSeleccionada(tienda.getBanca().getFichaDeLaBanca());
                         tienda.agregarFichaAlPool(tienda.getBanca().getFichaDeLaBanca().getFicha(),tienda.getBanca().getFichaDeLaBanca().getFicha().getEstrellas()/3);
+                        tienda.getBanca().eliminarFichaSeleccionada(tienda.getBanca().getFichaDeLaBanca());
                     }else if(tienda.getTablero().getFichaTablero()!= null){
+                        tienda.agregarFichaAlPool(tienda.getTablero().getFichaTablero().getFicha(),tienda.getTablero().getFichaTablero().getFicha().getEstrellas()/3);
                         tienda.getTablero().sacarFichaTablero(tienda.getTablero().getFichaTablero().getFicha());
                         tienda.getBanca().eliminarFichaSeleccionada(tienda.getTablero().getFichaTablero());
-                        tienda.agregarFichaAlPool(tienda.getTablero().getFichaTablero().getFicha(),tienda.getTablero().getFichaTablero().getFicha().getEstrellas()/3);
-
                     }else{
                         System.out.println("ninguna ficha seleccionada");
                     }
 
             }
         });
-    }
-
-    public void cambiarVisibilidadVenta(boolean v){
-        venta.setVisible(v);
-        venta.setEnabled(v);
     }
 
     public JPanel getVenta(){return this.venta;}
@@ -163,21 +153,20 @@ public class TiendaGUI {
     public void asignarImagenesRasgos() {
         cargarDireccionesImagenesRasgos();
         int i = 0;
-        // Iterar sobre los rasgos
         for (Rasgos rasgo : Rasgos.values()) {
             // Solo asignar si hay una imagen disponible
             if (i < direccionesImagenesRasgos.size()) {
                 imagenesRasgos.put(rasgo, direccionesImagenesRasgos.get(i));
                 i++;
             } else {
-                break; // Salir del bucle si ya no hay más imágenes
+                break;
             }
         }
     }
 
     public void actualizarTiendaGui() {
-        panelFichas.removeAll(); // Limpiar las fichas anteriores
-        //List<Ficha> fichas = this.tienda.generarFichas(this.tienda.getJugador().getNivel());
+        panelFichas.removeAll();
+
         List<Ficha> fichas = tienda.actualizarTienda(tienda.getJugador().getNivel());
         for (Ficha ficha : fichas) {
             JPanel panelFicha = new JPanel(new BorderLayout());
@@ -189,9 +178,7 @@ public class TiendaGUI {
                 if(!rasgo.getNombre().equals(Rasgos.NULL)){
                     ImageIcon imagenRasgo = rasgo.getImagenRasgo();
 
-                    // Escalar la imagen a un tamaño más pequeño
-                    //Image imagenEscalada = imagenRasgo.getImage().getScaledInstance(60, 40, Image.SCALE_SMOOTH);
-                    Image imagenEscalada = imagenRasgo.getImage().getScaledInstance(50, 30, Image.SCALE_SMOOTH); // Imágenes más pequeñas
+                    Image imagenEscalada = imagenRasgo.getImage().getScaledInstance(50, 30, Image.SCALE_SMOOTH);
                     JLabel rasgoLabel = new JLabel(new ImageIcon(imagenEscalada));
                     panelRasgos.add(rasgoLabel);
                 }
@@ -202,9 +189,7 @@ public class TiendaGUI {
             panelRasgos.add(Box.createRigidArea(new Dimension(10, 0))); // Ajustar espaciado horizontal si es necesario
             panelRasgos.add(coste);
             panelRasgos.add(Box.createVerticalStrut(5));
-            //panelRasgos.add(coste,BorderLayout.SOUTH);
 
-            // Crear un JLabel con la imagen y el nombre de la ficha
             JLabel fichaLabel = new JLabel(ficha.getNombre(), ficha.getFichaImagen().getImagen(), JLabel.CENTER);
             fichaLabel.setVerticalTextPosition(JLabel.BOTTOM);
             fichaLabel.setHorizontalTextPosition(JLabel.CENTER);
@@ -214,41 +199,41 @@ public class TiendaGUI {
             fichaLabel.setBackground(ficha.getColor());
             fichaLabel.setOpaque(true);
 
-            // Añadir el JLabel al JPanel que representa la ficha
             panelFicha.add(panelRasgos, BorderLayout.WEST);
             panelFicha.add(fichaLabel, BorderLayout.CENTER);
 
-            // Añadir MouseListener al JLabel de la ficha
             fichaLabel.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(java.awt.event.MouseEvent e) {
                     if (tienda.getJugador().getMonedas() >= ficha.getCoste()) {
-                        tienda.sacarFichaDelPool(ficha);
-                        tienda.getJugador().restarMonedas(ficha.getCoste()); // Restar las monedas del jugador
-                        actualizarLabelMonedas(); // Actualizar la visualización de monedas
-                        //banca.agregarFicha(ficha); // Mover la ficha a la banca
-                        FichaClickeableGUI fichaClickeableGUI = new FichaClickeableGUI(ficha);
-                        //fichaClickeableGUI.setTablero(bancaTab);
-                        fichaClickeableGUI.setBanca(tienda.getBanca());
-                        //bancaTab.agregarFichaALaBanca(fichaClickeableGUI);
-                        tienda.getBanca().agregarFichaALaBanca(fichaClickeableGUI);
+                        if (tienda.getBanca().hayEspacioBanca()){
+                         tienda.sacarFichaDelPool(ficha);
+                         tienda.getJugador().restarMonedas(ficha.getCoste());
+                         actualizarLabelMonedas();
 
-                        // Eliminar la ficha de la tienda
-                        panelFicha.removeAll(); // Vaciar el panel donde estaba la ficha
-                        panelFicha.revalidate();
-                        panelFicha.repaint();
+                         FichaClickeableGUI fichaClickeableGUI = new FichaClickeableGUI(ficha);
+
+                         fichaClickeableGUI.setBanca(tienda.getBanca());
+
+                         tienda.getBanca().agregarFichaALaBanca(fichaClickeableGUI);
+
+                         panelFicha.removeAll();
+                         panelFicha.revalidate();
+                         panelFicha.repaint();
+                        }else{
+                            JOptionPane.showMessageDialog(TiendaGUI.this, "No hay celdas libres en la banca.");
+                        }
                     } else {
-                        labelMensaje.setText("Monedas insuficientes"); // Mostrar mensaje de error
+                        labelMensaje.setText("Monedas insuficientes");
                     }
                 }
             });
 
-            // Añadir el panel que contiene la ficha al panel de la tienda
             panelFichas.add(panelFicha);
         }
 
-        panelFichas.revalidate(); // Revalidar para actualizar la vista
-        panelFichas.repaint(); // Repintar para asegurarse de que los cambios se reflejen
+        panelFichas.revalidate();
+        panelFichas.repaint();
     }
 
     public void actualizarLabelMonedas() {

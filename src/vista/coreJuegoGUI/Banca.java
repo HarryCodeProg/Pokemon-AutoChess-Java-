@@ -45,10 +45,10 @@ public class Banca extends JPanel{
                 public void mouseClicked(MouseEvent e) {
                     if (fichaDeLaBanca != null) {
                         moverFichaEnBanca(index);
-                    } else if (celdasBanca[index].getComponentCount() > 0) {
+                    } else if (celdasBanca[index].getComponentCount() > 0 && tablero.getFichaTablero() == null) {
                         seleccionarFicha((FichaClickeableGUI) celdasBanca[index].getComponent(0));
-                    } else if(tablero.getFichaTablero() != null){
-                        //moverFichaABanDesdeTab();
+                    } else if(tablero.getFichaTablero() != null && fichaDeLaBanca == null){
+                        moverFichaABancaDesdeTablero(tablero.getFichaTablero(),celdasBanca[index]);
                     }
                 }
             });
@@ -64,14 +64,12 @@ public class Banca extends JPanel{
                 JPanel celdaActual = celdasBanca[i];
 
                 if (celdasBanca[nuevaPosicion].getComponentCount() > 0) {
-                    // Intercambiar fichas entre celdas
                     FichaClickeableGUI fichaIntercambiada = (FichaClickeableGUI) celdasBanca[nuevaPosicion].getComponent(0);
                     celdasBanca[nuevaPosicion].remove(fichaIntercambiada);
                     celdaActual.remove(fichaDeLaBanca);
                     celdasBanca[nuevaPosicion].add(fichaDeLaBanca);
                     celdaActual.add(fichaIntercambiada);
                 } else {
-                    // Mover ficha a la nueva celda
                     celdasBanca[nuevaPosicion].add(fichaDeLaBanca);
                     celdaActual.remove(fichaDeLaBanca);
                 }
@@ -85,6 +83,38 @@ public class Banca extends JPanel{
         fichaDeLaBanca = null;
     }
 
+    public void moverFichaABancaDesdeTablero(FichaClickeableGUI ficha, JPanel celda){
+        JPanel celdaAnterior = (JPanel) ficha.getParent();
+        if (celda.getComponentCount() == 0){
+          celda.add(ficha);
+          celdaAnterior.remove(ficha);
+          tablero.removerRasgosFicha(ficha);
+          ficha.detenerAnimacion();
+          ficha.iniciarAnimacion();
+          fichaBancaSetNull();
+          ficha.setBorder(null);
+        }else if(celda.getComponentCount() > 0){
+            FichaClickeableGUI fichaGuardar = (FichaClickeableGUI) celda.getComponent(0);
+            celda.remove(fichaGuardar);
+            celda.add(ficha);
+            celdaAnterior.remove(ficha);
+            celdaAnterior.add(fichaGuardar);
+            ficha.detenerAnimacion();
+            ficha.iniciarAnimacion();
+            tablero.removerRasgosFicha(ficha);
+            fichaGuardar.detenerAnimacion();
+            fichaGuardar.animacionArriba();
+            tablero.agregarRasgosFicha(fichaGuardar);
+            ficha.setBorder(null);
+        }
+        celdaAnterior.revalidate();
+        celdaAnterior.repaint();
+        celda.revalidate();
+        celda.repaint();
+        tablero.fichaTabSetNull();
+        fichaBancaSetNull();
+    }
+
     public FichaClickeableGUI getFichaDeLaBanca(){return fichaDeLaBanca;}
 
     public void fichaBancaSetNull(){this.fichaDeLaBanca = null;}
@@ -92,13 +122,21 @@ public class Banca extends JPanel{
     public void setTablero(Tablero tab){this.tablero = tab;}
 
     public void eliminarFichaSeleccionada(FichaClickeableGUI ficha){
-        Container parent1 = ficha.getParent();
-        if (parent1 != null) {
-            parent1.remove(ficha);
-            parent1.revalidate();
-            parent1.repaint();
-            tablero.sacarFichaTablero(ficha.getFicha());
-        }
+       try{
+           Container parent1 = ficha.getParent();
+           if (parent1 != null) {
+               parent1.remove(ficha);
+               parent1.revalidate();
+               parent1.repaint();
+               if(tablero.getFichaTablero() != null){
+                   tablero.sacarFichaTablero(ficha.getFicha());
+               }
+
+           }
+       }catch (Exception e){
+           System.out.println("Error");
+       }
+
     }
 
     public void seleccionarFicha(FichaClickeableGUI ficha) {
@@ -161,6 +199,15 @@ public class Banca extends JPanel{
         }
     }
 
+    public boolean hayEspacioBanca(){
+        for (int i = 0; i < celdasBanca.length; i++) {
+            if (celdasBanca[i].getComponentCount() == 0) {
+              return true;
+            }
+        }
+        return false;
+    }
+
     private void verificarFusion() {
         boolean fusionRealizada;
 
@@ -188,21 +235,21 @@ public class Banca extends JPanel{
             for (ArrayList<FichaClickeableGUI> grupoFichas : fichasPorNombreYEstrellas.values()) {
                 if (grupoFichas.size() >= 3) {
                     // Subir de estrellas a una de las fichas
-                    FichaClickeableGUI fichaParaSubir = grupoFichas.get(0);
+                    FichaClickeableGUI fichaParaSubir = grupoFichas.get(2);
                     fichaParaSubir.getFicha().subirEstrellas();
                     fichaParaSubir.getFicha().cambiarNombre();
 
-                    fichaParaSubir.iniciarAnimacion();
-                    //fichaParaSubir.animacionArriba();
+                    //fichaParaSubir.iniciarAnimacion();
+                    fichaParaSubir.animacionArriba();
 
                     // Eliminar las otras dos fichas
-                    eliminarFichasFusionadas(grupoFichas.get(1), grupoFichas.get(2));
+                    eliminarFichasFusionadas(grupoFichas.get(0), grupoFichas.get(1));
 
                     fusionRealizada = true;
                     break;
                 }
             }
-        } while (fusionRealizada); // Continuar verificando mientras haya fusiones posibles
+        } while (fusionRealizada);
     }
 
     private void agregarFichaAMapa(Map<String, ArrayList<FichaClickeableGUI>> fichasPorNombreYEstrellas, FichaClickeableGUI ficha) {

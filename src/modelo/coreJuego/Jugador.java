@@ -64,7 +64,6 @@ public class Jugador implements Serializable {
     }
 
     public void restarXp(int xpParaRestar) {
-        // Si la experiencia actual es mayor o igual a la experiencia para restar, simplemente restamos
         if (xpActual >= xpParaRestar) {
             xpActual -= xpParaRestar;
         } else {
