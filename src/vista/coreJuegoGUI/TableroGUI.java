@@ -1,6 +1,5 @@
 package vista.coreJuegoGUI;
 
-import controlador.Observador;
 import modelo.coreJuego.fichas.Ficha;
 import modelo.coreJuego.fichas.Rasgo;
 import modelo.coreJuego.fichas.Rasgos;
@@ -14,16 +13,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Tablero extends JPanel{
+public class TableroGUI extends JPanel{
     private JPanel[][] celdasTablero;
     private FichaClickeableGUI fichaTablero = null;
     private int cantidadMaximaTablero;
     private Map<Rasgo, Integer> contadorRasgos = new HashMap<>();
-    private ArrayList<Observador> observadores;
+    //private ArrayList<Observador> observadores;
     private JPanel panelRasgos;
-    private Banca banca;
+    private BancaGUI banca;
 
-    public Tablero(){
+    public TableroGUI(){
         setLayout(new BorderLayout());
 
         JPanel tablero = inicializarTablero();
@@ -47,7 +46,7 @@ public class Tablero extends JPanel{
                 celda.setPreferredSize(new Dimension(64, 72));
                 celda.setOpaque(false);
 
-                final int filaFinal = fila; // Necesario para uso en clase anónima
+                final int filaFinal = fila; // Necesario para uso en clase anonima
                 final int columnaFinal = columna;
 
                 celda.addMouseListener(new MouseAdapter() {
@@ -78,15 +77,19 @@ public class Tablero extends JPanel{
         return this.celdasTablero;
     }
 
-    public void setBanca(Banca ba){
+    public void setBanca(BancaGUI ba){
         this.banca = ba;
     }
 
+    public boolean estaCeldaOcupada(int fila, int columna) { return celdasTablero[fila][columna].getComponentCount() > 0; }
+
     public void añadirAlTableroPorCoor(int x, int y, Ficha ficha){
-        FichaClickeableGUI fichagui = new FichaClickeableGUI(ficha);
-        fichagui.setBanca(banca);
-        this.celdasTablero[x][y].add(fichagui);
-        fichagui.iniciarAnimacion();
+        if (!estaCeldaOcupada(x, y)){
+            FichaClickeableGUI fichagui = new FichaClickeableGUI(ficha);
+            fichagui.setBanca(banca);
+            this.celdasTablero[x][y].add(fichagui);
+            fichagui.iniciarAnimacion();
+        }
     }
 
     public FichaClickeableGUI getFichaTablero(){
@@ -135,14 +138,12 @@ public class Tablero extends JPanel{
     public void colocarFichaEnTablero(JPanel celdaTablero, int cantidadFichaMaximo) {
         int fichasActualesEnTablero = contarFichasEnTablero();
 
-        // Verificar si ya se alcanzó el límite de fichas permitidas en el tablero
         if (fichasActualesEnTablero >= cantidadFichaMaximo) {
             System.out.println("No puedes colocar más fichas en el tablero");
             JOptionPane.showMessageDialog(this,"No puedes colocar más fichas en el tablero");
             return;
         }
 
-        // Si la celda está vacía, colocar la ficha desde la banca
         if (celdaTablero.getComponentCount() == 0) {
             Container parent = banca.getFichaDeLaBanca().getParent();
             if (parent != null) {
@@ -157,11 +158,11 @@ public class Tablero extends JPanel{
             celdaTablero.repaint();
             banca.getFichaDeLaBanca().setBorder(null);
 
-            if(!fichaEstaEnTablero(banca.getFichaDeLaBanca())){
+            if(!fichaEstaEnTablero(banca.getFichaDeLaBanca(),false)){
                 agregarRasgosFicha(banca.getFichaDeLaBanca());
                 ordenarContadorRasgos();
+                actualizarRasgos();
             }
-
             fichaTablero = null;
             banca.fichaBancaSetNull();
         }
@@ -215,20 +216,27 @@ public class Tablero extends JPanel{
         return contador;
     }
 
-    public boolean fichaEstaEnTablero(FichaClickeableGUI ficha){
+    public boolean fichaEstaEnTablero(FichaClickeableGUI ficha,boolean vende){
         int contador = 0;
+        String nombreFicha = ficha.getFicha().getNombreOriginal();
+
         for (int fila = 3; fila < 6; fila++) {
             for (int columna = 0; columna < 6; columna++) {
                 if (celdasTablero[fila][columna].getComponentCount() > 0) {
                     FichaClickeableGUI fichaEnCelda = (FichaClickeableGUI) celdasTablero[fila][columna].getComponent(0);
-
-                    if (fichaEnCelda.getFicha().getNombreOriginal().equals(ficha.getFicha().getNombreOriginal()) || fichaEnCelda.getFicha().getNombre().equals(ficha.getFicha().getNombreOriginal())) {
-                        contador++;
+                    if(!vende){
+                        if (fichaEnCelda != ficha && fichaEnCelda.getFicha().getNombreOriginal() == nombreFicha) {
+                            contador++;
+                        }
+                    }else{
+                        if (fichaEnCelda == ficha){
+                            contador++;
+                        }
                     }
                 }
             }
         }
-        return contador >= 2;
+        return contador >= 1;
     }
 
     public void setCantidadMaximaTablero(int cantidad){
@@ -244,8 +252,9 @@ public class Tablero extends JPanel{
                     //if (fichaEnCelda.getFicha().getNombre().equals(ficha.getNombre())) {
                     if (fichaEnCelda.getFicha() == ficha) {
                         FichaClickeableGUI gui = new FichaClickeableGUI(ficha);
-                        if(!fichaEstaEnTablero(gui) ){
+                        if(!fichaEstaEnTablero(gui,true) ){
                            removerRasgosFicha(gui);
+                           System.out.print("aca deberia entrar al vender jijijeja");
                         }
                         actualizarRasgos();
                         celdasTablero[fila][columna].remove(fichaEnCelda);
@@ -272,6 +281,13 @@ public class Tablero extends JPanel{
                 celdasTablero[fila][columna].repaint();
             }
         }
+    }
+
+    public FichaClickeableGUI getFichaEnCelda(int fila, int columna) {
+        if (estaCeldaOcupada(fila, columna)) {
+            return (FichaClickeableGUI) celdasTablero[fila][columna].getComponent(0);
+        }
+        return null;
     }
 
     public void actualizarRasgos() {
@@ -311,7 +327,5 @@ public class Tablero extends JPanel{
         panelRasgos.repaint();
     }
 
-    public JPanel getPanelRasgos(){
-        return this.panelRasgos;
-    }
+    public JPanel getPanelRasgos(){return this.panelRasgos;}
 }

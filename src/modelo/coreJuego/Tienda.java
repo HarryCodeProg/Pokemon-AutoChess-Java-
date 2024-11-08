@@ -1,28 +1,13 @@
 package modelo.coreJuego;
 
-import java.awt.*;
-import java.awt.event.MouseAdapter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 import modelo.coreJuego.fichas.*;
-import modelo.coreJuego.Jugador;
-import vista.coreJuegoGUI.Banca;
+import vista.coreJuegoGUI.BancaGUI;
 
-import javax.swing.*;
-import java.util.HashMap;
-import java.util.Map;
-import java.io.File;
-import org.json.*;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import vista.coreJuegoGUI.FichaClickeableGUI;
-import vista.coreJuegoGUI.Tablero;
-
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.io.IOException;
+import vista.coreJuegoGUI.TableroGUI;
 
 public class Tienda {
 
@@ -31,9 +16,6 @@ public class Tienda {
     private Ficha krabby;
     private Ficha rattata;
     private Ficha regigigas;
-    private Jugador jugador;
-    private Banca banca;
-    private Tablero tablero;
 
     public Tienda() {
         todasLasFichas = new ArrayList<>();
@@ -130,11 +112,6 @@ public class Tienda {
 
     public List<Ficha> getTodasLasFichas(){return this.todasLasFichas;}
 
-    public Jugador getJugador(){return this.jugador;}
-
-    public Banca getBanca() {return banca;}
-
-    public Tablero getTablero() {return tablero;}
 
     public List<Ficha> actualizarTienda(int nivel) {
         List<Ficha> fichasEnTienda = new ArrayList<>();
@@ -198,13 +175,6 @@ public class Tienda {
     public Ficha getRattata(){return this.rattata;}
 
     public Ficha getRegigigas() {return regigigas;}
-
-    public void setJugador(Jugador jugador){this.jugador = jugador;}
-
-    public void setBancaYTablero(Banca ba,Tablero tab){
-        this.banca = ba;
-        this.tablero = tab;
-    }
 
     private int seleccionarCoste(int nivel) {
         int aleatorio = random.nextInt(100);

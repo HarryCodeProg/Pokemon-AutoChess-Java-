@@ -36,7 +36,7 @@ public class FichaMovimiento {
                 }
             }
         }
-        return null; // No se encontró un enemigo dentro del alcance
+        return null;
     }
 
     public void setFila(int y) {this.alcance = y;}

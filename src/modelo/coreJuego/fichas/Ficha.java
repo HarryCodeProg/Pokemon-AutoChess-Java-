@@ -126,9 +126,7 @@ public class Ficha {
 
     public int getEstrellas() {return estrellas;}
 
-    public Rasgo[] getRasgos() {
-        return new Rasgo[]{rasgo1, rasgo2, rasgo3}; // Devuelve un arreglo con los rasgos
-    }
+    public Rasgo[] getRasgos() {return new Rasgo[]{rasgo1, rasgo2, rasgo3};}
 
     public void esFichaEnemiga(){this.fichaEnemiga = true;}
 

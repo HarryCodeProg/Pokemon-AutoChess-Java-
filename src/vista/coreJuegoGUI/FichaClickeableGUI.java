@@ -14,23 +14,18 @@ import java.awt.image.BufferedImage;
 
 public class FichaClickeableGUI extends JLabel {
     private Ficha ficha;
-    private boolean enArrastre = false;
-    private Point offset;  // Offset para corregir la posición del arrastre
-    private JWindow arrastrador;  // Ventana flotante que seguirá al cursor
     private BufferedImage spriteSheet;
     private BufferedImage[] frames;
-    private int currentFrame = 0;  // Frame actual de la animación
-    private Timer timer;  // Temporizador para actualizar la animación
-    private boolean animacionActiva = false;// Controla si se está mostrando la animación o no
+    private int currentFrame = 0;
+    private Timer timer;
+    private boolean animacionActiva = false;
     private JPanel barraVida;
     private JPanel barraMana;
-    //private BancaYTablero bTablero;
     //private Tablero tablero;
-    private Banca banca;
+    private BancaGUI banca;
 
     public FichaClickeableGUI(Ficha ficha) {
         this.ficha = ficha;
-        // Inicialmente mostramos la imagen estática de la ficha
         setIcon(ficha.getFichaImagen().getImagen());
         setVerticalTextPosition(JLabel.BOTTOM);
         setHorizontalTextPosition(JLabel.CENTER);
@@ -53,7 +48,6 @@ public class FichaClickeableGUI extends JLabel {
 
         add(panelBarras,BorderLayout.NORTH);
 
-        // Listener para manejar el clic izquierdo (arrastre) y clic derecho (mostrar stats)
         addMouseListener(new MouseAdapter() {
            /* @Override
             public void mousePressed(MouseEvent e) {
@@ -79,19 +73,9 @@ public class FichaClickeableGUI extends JLabel {
                 }
             }
         });
-
-        // Listener para el movimiento del mouse durante el arrastre
-        /*addMouseMotionListener(new MouseMotionAdapter() {
-            @Override
-            public void mouseDragged(MouseEvent e) {
-                if (enArrastre) {
-                    moverArrastre(e);  // Mover la imagen mientras se arrastra
-                }
-            }
-        });*/
     }
 
-    public void setBanca(Banca banca){
+    public void setBanca(BancaGUI banca){
         this.banca = banca;
     }
 
@@ -139,15 +123,13 @@ public class FichaClickeableGUI extends JLabel {
     public void detenerAnimacion() {
         if (animacionActiva) {
             timer.stop();
-            setIcon(ficha.getFichaImagen().getImagen());  // Volver a mostrar la imagen estática
+            setIcon(ficha.getFichaImagen().getImagen());
             animacionActiva = false;
         }
     }
 
-    // Animar la ficha con un sprite sheet
     public void animarFicha(String rutaSpriteSheet, int frameWidth, int frameHeight, int numFrames, int fila) {
         try {
-            // Cargar el sprite sheet
             spriteSheet = ImageIO.read(getClass().getResource(rutaSpriteSheet));
 
             // Dividir el sprite sheet en frames individuales de la fila seleccionada
@@ -173,18 +155,10 @@ public class FichaClickeableGUI extends JLabel {
                 }
             });
 
-            // Iniciar la animación
             timer.start();
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    // Actualiza la posición de la ventana en función del movimiento del mouse
-    private void moverArrastre(MouseEvent e) {
-        Point newLocation = e.getLocationOnScreen();
-        newLocation.translate(-offset.x, -offset.y);  // Ajusta con el offset del clic
-        arrastrador.setLocation(newLocation);  // Mueve la ventana al seguir el cursor
     }
 
    public void actualizarBarraVida() {
@@ -194,15 +168,14 @@ public class FichaClickeableGUI extends JLabel {
         // Ajustar el ancho de la barra de vida según el porcentaje
         int anchoBarraVida = (int) (porcentajeVida * barraVida.getPreferredSize().width);
 
-        // Configurar los colores de la barra
-        barraVida.removeAll();  // Limpiar el contenido previo
+        barraVida.removeAll();
         barraVida.setLayout(new BorderLayout());
         JPanel vidaActual = new JPanel();
         vidaActual.setBackground(Color.GREEN);
         vidaActual.setPreferredSize(new Dimension(anchoBarraVida, barraVida.getPreferredSize().height));
 
         JPanel vidaRestante = new JPanel();
-        vidaRestante.setBackground(Color.RED);  // Rojo para la parte vacía
+        vidaRestante.setBackground(Color.RED);
         vidaRestante.setPreferredSize(new Dimension(barraVida.getPreferredSize().width - anchoBarraVida, barraVida.getPreferredSize().height));
 
         barraVida.add(vidaActual, BorderLayout.WEST);
@@ -219,7 +192,6 @@ public class FichaClickeableGUI extends JLabel {
         // Ajustar el ancho de la barra de maná según el porcentaje
         int anchoBarraMana = (int) (porcentajeMana * barraMana.getPreferredSize().width);
 
-        // Limpiar el contenido previo
         barraMana.removeAll();
         barraMana.setLayout(new BorderLayout());
 
@@ -231,35 +203,8 @@ public class FichaClickeableGUI extends JLabel {
         // Añadir solo la barra de maná llena
         barraMana.add(manaActual, BorderLayout.WEST);
 
-        // Revalidar y repintar para mostrar los cambios
         barraMana.revalidate();
         barraMana.repaint();
-    }
-
-    // Inicia el arrastre creando un JWindow que sigue el cursor
-    private void iniciarArrastre(MouseEvent e) {
-        enArrastre = true;
-        offset = e.getPoint();  // Obtiene la posición relativa dentro del JLabel
-
-        // Crear una ventana transparente que sigue al cursor
-        arrastrador = new JWindow();
-        arrastrador.setBackground(new Color(0, 0, 0, 0));  // Hacer la ventana transparente
-        arrastrador.setSize(getSize());  // El tamaño de la ventana será el de la ficha
-
-        // Crear un JLabel con la misma imagen de la ficha para mostrarla en la ventana
-        JLabel arrastrable = new JLabel(getIcon());
-        arrastrador.add(arrastrable);
-        arrastrador.setVisible(true);
-
-        // Mueve la ventana al iniciar el arrastre
-        moverArrastre(e);
-    }
-
-    // Finaliza el arrastre y oculta la ventana flotante
-    private void finalizarArrastre(MouseEvent e) {
-        enArrastre = false;
-        arrastrador.setVisible(false);
-        arrastrador.dispose();  // Destruir la ventana
     }
 
     public Ficha getFicha() {
@@ -305,12 +250,10 @@ public class FichaClickeableGUI extends JLabel {
             if(!rasgo.getNombre().equals(Rasgos.NULL)) {
                 ImageIcon imagenRasgo = rasgo.getImagenRasgo();
 
-                // Redimensionar la imagen del rasgo
                 Image imgRasgo = imagenRasgo.getImage();
                 Image imgRasgoEscalada = imgRasgo.getScaledInstance(60, 30, java.awt.Image.SCALE_SMOOTH);
                 ImageIcon imagenRasgoEscalada = new ImageIcon(imgRasgoEscalada);
 
-                // Crear un JLabel con la imagen redimensionada del rasgo
                 JLabel rasgoLabel = new JLabel(imagenRasgoEscalada);
                 panelRasgos.add(rasgoLabel);
             }

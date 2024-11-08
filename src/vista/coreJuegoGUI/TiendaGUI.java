@@ -1,5 +1,6 @@
 package vista.coreJuegoGUI;
 
+import modelo.coreJuego.Jugador;
 import modelo.coreJuego.Tienda;
 import modelo.coreJuego.fichas.Ficha;
 import modelo.coreJuego.fichas.Rasgo;
@@ -24,14 +25,16 @@ import java.util.Map;
 public class TiendaGUI extends JPanel{
     private List<String> direccionesImagenesRasgos = new ArrayList<>();
     private Tienda tienda;
+    private Jugador jugador;
     private Map<Rasgos, String> imagenesRasgos = new HashMap<>();
     private JPanel panelFichas = new JPanel();
     private Label labelMensaje = new Label();
     private JLabel labelMonedas = new JLabel();
     private JPanel venta;
 
-    public TiendaGUI(Tienda t){
+    public TiendaGUI(Tienda t,Jugador jugador){
         this.tienda = t;
+        this.jugador = jugador;
         asignarImagenesRasgos();
         inicializarVenta();
     }
@@ -108,13 +111,13 @@ public class TiendaGUI extends JPanel{
         venta.addMouseListener(new MouseAdapter(){
             @Override
             public void mouseClicked(MouseEvent e) {
-                    if (tienda.getBanca().getFichaDeLaBanca()!= null){
-                        tienda.agregarFichaAlPool(tienda.getBanca().getFichaDeLaBanca().getFicha(),tienda.getBanca().getFichaDeLaBanca().getFicha().getEstrellas()/3);
-                        tienda.getBanca().eliminarFichaSeleccionada(tienda.getBanca().getFichaDeLaBanca());
-                    }else if(tienda.getTablero().getFichaTablero()!= null){
-                        tienda.agregarFichaAlPool(tienda.getTablero().getFichaTablero().getFicha(),tienda.getTablero().getFichaTablero().getFicha().getEstrellas()/3);
-                        tienda.getTablero().sacarFichaTablero(tienda.getTablero().getFichaTablero().getFicha());
-                        tienda.getBanca().eliminarFichaSeleccionada(tienda.getTablero().getFichaTablero());
+                    if (jugador.getBanca().getFichaDeLaBanca()!= null){
+                        tienda.agregarFichaAlPool(jugador.getBanca().getFichaDeLaBanca().getFicha(),jugador.getBanca().getFichaDeLaBanca().getFicha().getEstrellas()/3);
+                        jugador.getBanca().eliminarFichaSeleccionada(jugador.getBanca().getFichaDeLaBanca());
+                    }else if(jugador.getTablero().getFichaTablero()!= null){
+                        tienda.agregarFichaAlPool(jugador.getTablero().getFichaTablero().getFicha(),jugador.getTablero().getFichaTablero().getFicha().getEstrellas()/3);
+                        jugador.getTablero().sacarFichaTablero(jugador.getTablero().getFichaTablero().getFicha());
+                        jugador.getBanca().eliminarFichaSeleccionada(jugador.getTablero().getFichaTablero());
                     }else{
                         System.out.println("ninguna ficha seleccionada");
                     }
@@ -167,7 +170,7 @@ public class TiendaGUI extends JPanel{
     public void actualizarTiendaGui() {
         panelFichas.removeAll();
 
-        List<Ficha> fichas = tienda.actualizarTienda(tienda.getJugador().getNivel());
+        List<Ficha> fichas = tienda.actualizarTienda(jugador.getNivel());
         for (Ficha ficha : fichas) {
             JPanel panelFicha = new JPanel(new BorderLayout());
 
@@ -205,17 +208,17 @@ public class TiendaGUI extends JPanel{
             fichaLabel.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(java.awt.event.MouseEvent e) {
-                    if (tienda.getJugador().getMonedas() >= ficha.getCoste()) {
-                        if (tienda.getBanca().hayEspacioBanca()){
+                    if (jugador.getMonedas() >= ficha.getCoste()) {
+                        if (jugador.getBanca().hayEspacioBanca()){
                          tienda.sacarFichaDelPool(ficha);
-                         tienda.getJugador().restarMonedas(ficha.getCoste());
+                         jugador.restarMonedas(ficha.getCoste());
                          actualizarLabelMonedas();
 
                          FichaClickeableGUI fichaClickeableGUI = new FichaClickeableGUI(ficha);
 
-                         fichaClickeableGUI.setBanca(tienda.getBanca());
+                         fichaClickeableGUI.setBanca(jugador.getBanca());
 
-                         tienda.getBanca().agregarFichaALaBanca(fichaClickeableGUI);
+                         jugador.getBanca().agregarFichaALaBanca(fichaClickeableGUI);
 
                          panelFicha.removeAll();
                          panelFicha.revalidate();
@@ -237,7 +240,7 @@ public class TiendaGUI extends JPanel{
     }
 
     public void actualizarLabelMonedas() {
-        labelMonedas.setText(String.format("Monedas: %d", tienda.getJugador().getMonedas()));
+        labelMonedas.setText(String.format("Monedas: %d", jugador.getMonedas()));
         labelMonedas.revalidate();
         labelMonedas.repaint();
     }

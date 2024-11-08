@@ -1,7 +1,6 @@
 package vista.coreJuegoGUI;
 
 import controlador.Observador;
-import modelo.coreJuego.fichas.Rasgo;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,13 +10,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Banca extends JPanel{
+public class BancaGUI extends JPanel{
     private JPanel[] celdasBanca;
     private FichaClickeableGUI fichaDeLaBanca = null;
     private ArrayList<Observador> observadores;
-    private Tablero tablero;
+    private TableroGUI tablero;
 
- public Banca(){
+ public BancaGUI(){
      setLayout(new BorderLayout());
 
      JPanel panelBanca = inicializarBanca();
@@ -83,43 +82,48 @@ public class Banca extends JPanel{
         fichaDeLaBanca = null;
     }
 
-    public void moverFichaABancaDesdeTablero(FichaClickeableGUI ficha, JPanel celda){
-        JPanel celdaAnterior = (JPanel) ficha.getParent();
-        if (celda.getComponentCount() == 0){
-          celda.add(ficha);
-          celdaAnterior.remove(ficha);
-          tablero.removerRasgosFicha(ficha);
-          ficha.detenerAnimacion();
-          ficha.iniciarAnimacion();
-          fichaBancaSetNull();
-          ficha.setBorder(null);
-        }else if(celda.getComponentCount() > 0){
-            FichaClickeableGUI fichaGuardar = (FichaClickeableGUI) celda.getComponent(0);
-            celda.remove(fichaGuardar);
-            celda.add(ficha);
-            celdaAnterior.remove(ficha);
-            celdaAnterior.add(fichaGuardar);
+    public void moverFichaABancaDesdeTablero(FichaClickeableGUI ficha, JPanel celdaDestino) {
+        JPanel celdaOrigen = (JPanel) ficha.getParent();
+        if (celdaDestino.getComponentCount() == 0) {
+            celdaDestino.add(ficha);
+            celdaOrigen.remove(ficha);
+            if (!tablero.fichaEstaEnTablero(ficha,false)) {
+                tablero.removerRasgosFicha(ficha);
+            }
+            ficha.detenerAnimacion();
+            ficha.iniciarAnimacion();
+            fichaBancaSetNull();
+            ficha.setBorder(null);
+        } else {
+            FichaClickeableGUI fichaEnBanca = (FichaClickeableGUI) celdaDestino.getComponent(0);
+            celdaDestino.remove(fichaEnBanca);
+            celdaDestino.add(ficha);
+            celdaOrigen.remove(ficha);
+            celdaOrigen.add(fichaEnBanca);
             ficha.detenerAnimacion();
             ficha.iniciarAnimacion();
             tablero.removerRasgosFicha(ficha);
-            fichaGuardar.detenerAnimacion();
-            fichaGuardar.animacionArriba();
-            tablero.agregarRasgosFicha(fichaGuardar);
+
+            fichaEnBanca.detenerAnimacion();
+            fichaEnBanca.animacionArriba();
+            tablero.agregarRasgosFicha(fichaEnBanca);
+
             ficha.setBorder(null);
         }
-        celdaAnterior.revalidate();
-        celdaAnterior.repaint();
-        celda.revalidate();
-        celda.repaint();
+        celdaOrigen.revalidate();
+        celdaOrigen.repaint();
+        celdaDestino.revalidate();
+        celdaDestino.repaint();
         tablero.fichaTabSetNull();
         fichaBancaSetNull();
     }
+
 
     public FichaClickeableGUI getFichaDeLaBanca(){return fichaDeLaBanca;}
 
     public void fichaBancaSetNull(){this.fichaDeLaBanca = null;}
 
-    public void setTablero(Tablero tab){this.tablero = tab;}
+    public void setTablero(TableroGUI tab){this.tablero = tab;}
 
     public void eliminarFichaSeleccionada(FichaClickeableGUI ficha){
        try{

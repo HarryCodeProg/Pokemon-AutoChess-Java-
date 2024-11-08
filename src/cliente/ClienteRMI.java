@@ -1,5 +1,7 @@
 package cliente;
 
+import modelo.coreJuego.Juego;
+import modelo.coreJuego.Tienda;
 import vista.interfaz.IControlador;
 import modelo.coreJuego.Jugador;
 import vista.coreJuegoGUI.PokemonAutoChessGUI;
@@ -11,7 +13,7 @@ import java.rmi.registry.Registry;
 
 public class ClienteRMI {
     public static void main(String[] args) {
-        try {
+       /* try {
             // Conexión al registro RMI en el servidor (localhost para pruebas)
             Registry registry = LocateRegistry.getRegistry("localhost", 1099);
             IControlador controlador = (IControlador) registry.lookup("Controlador");
@@ -27,7 +29,9 @@ public class ClienteRMI {
             SwingUtilities.invokeLater(() -> {
                 PokemonAutoChessGUI guiJugador = null;
                 try {
-                    guiJugador = new PokemonAutoChessGUI(jugador, controlador.obtenerJugadores());
+                    Juego juego;
+                    Tienda tienda;
+                    guiJugador = new PokemonAutoChessGUI(jugador, controlador.obtenerJugadores(),juego,tienda);
                 } catch (RemoteException e) {
                     throw new RuntimeException(e);
                 }
@@ -40,6 +44,6 @@ public class ClienteRMI {
 
         } catch (Exception e) {
             e.printStackTrace();
-        }
+        }*/
     }
 }

@@ -1,5 +1,8 @@
 package modelo.coreJuego;
 
+import vista.coreJuegoGUI.BancaGUI;
+import vista.coreJuegoGUI.TableroGUI;
+
 import java.io.Serializable;
 
 public class Jugador implements Serializable {
@@ -10,11 +13,14 @@ public class Jugador implements Serializable {
     private int vida;
     private int xpActual;
     private boolean listoParaRonda;
+    private BancaGUI banca;
+    private TableroGUI tablero;
 
     public Jugador(String nombreS) {
         this.nombre = nombreS;
         this.vida = 100;
         this.listoParaRonda = false;
+        tablero = new TableroGUI();
     }
 
     public int getNivel() {
@@ -62,6 +68,14 @@ public class Jugador implements Serializable {
     public int getXpActual(){
         return this.xpActual;
     }
+
+    public void setBanca(BancaGUI banca) {this.banca = banca;}
+
+    public void setTablero(TableroGUI tablero) {this.tablero = tablero;}
+
+    public BancaGUI getBanca() {return banca;}
+
+    public TableroGUI getTablero() {return tablero;}
 
     public void restarXp(int xpParaRestar) {
         if (xpActual >= xpParaRestar) {

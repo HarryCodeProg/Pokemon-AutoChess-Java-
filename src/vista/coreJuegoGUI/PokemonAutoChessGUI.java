@@ -2,25 +2,18 @@ package vista.coreJuegoGUI;
 
 import javax.swing.*;
 
-import javafx.scene.Scene;
-import javafx.scene.layout.StackPane;
-import modelo.coreJuego.fichas.Rasgo;
+import controlador.Observador;
 import modelo.music.Sonidos;
-import modelo.coreJuego.fichas.Ficha;
-import modelo.coreJuego.fichas.Rasgos;
 import modelo.coreJuego.Tienda;
 import modelo.coreJuego.Jugador;
 import modelo.coreJuego.Juego;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
 import java.util.*;
 import java.util.List;
 
-public class PokemonAutoChessGUI extends JFrame {
-
+public class PokemonAutoChessGUI extends JFrame implements Observador {
     private JPanel panelFichas;
     private JLabel labelNivel;
     private JLabel labelMonedas;
@@ -36,19 +29,22 @@ public class PokemonAutoChessGUI extends JFrame {
     private Map<String, String> direccionMusica;
     private Sonidos musicaDeFondo;
     private List<String> rutasImagenes;
-    private Juego juego;
     private JLabel faseRonda;
     private JButton botonRonda;
-    private Banca banca;
-    private Tablero tablero;
+    private BancaGUI bancaGUI;
+    private TableroGUI tableroGUI;
     private Color blancoFondo = new Color(255,255,255,220);
     private Color negroFondo = new Color(0,0,0,200);
+    private JugadorGUI jugadorGUI;
+    private Juego juego;
+    private JLabel labelEsperando;
 
-    public PokemonAutoChessGUI(Jugador jugadorN, ArrayList todosJugadores) {
+    public PokemonAutoChessGUI(Jugador jugadorN, ArrayList todosJugadores,Juego juego,Tienda tiendax) {
         setTitle("Pokemon AutoChess");
         setExtendedState(JFrame.MAXIMIZED_BOTH); // Pantalla completa
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
+        juego.agregarObservador(this);
 
         inicializarMusica();
         cargarRutasFondo();
@@ -65,17 +61,21 @@ public class PokemonAutoChessGUI extends JFrame {
         };
         panelConFondo.setLayout(new BorderLayout());
 
-        tienda = new Tienda();
-        tienda.setJugador(jugadorN);
-        tiendaGUI = new TiendaGUI(tienda);
+        this.tienda = tiendax;
         this.jugador = jugadorN;
-        banca = new Banca();
-        tablero = new Tablero();
-        banca.setTablero(tablero);
-        tablero.setBanca(banca);
-        tienda.setBancaYTablero(banca,tablero);
+        tiendaGUI = new TiendaGUI(tienda,jugador);
+        bancaGUI = new BancaGUI();
+        tableroGUI = jugador.getTablero();
+        bancaGUI.setTablero(tableroGUI);
+        tableroGUI.setBanca(bancaGUI);
 
-        this.juego = new Juego(jugador, tienda, banca,tablero);
+        //jugador.setTablero(tableroGUI);
+
+        this.juego = juego;
+
+        jugador.setBanca(bancaGUI);
+
+        jugadorGUI = new JugadorGUI(jugador);
 
         panelConFondo.add(setupPanelIzquierdo(), BorderLayout.WEST);
 
@@ -90,16 +90,29 @@ public class PokemonAutoChessGUI extends JFrame {
         panelConFondo.add(setupPanelNorte(), BorderLayout.NORTH);
 
         botonRonda.addActionListener(e -> {
-            //bancaYTablero.limpiarTableroEnemigo();
-            tablero.limpiarTableroEnemigo();
-            juego.subirRonda();
-            if(juego.getFase()>3 && juego.getRonda() == 5){
+            /*jugador.setListoParaRonda(true);
+            if (juego.todosListosParaNuevaRonda()) {
+             tableroGUI.limpiarTableroEnemigo();
+             juego.subirRonda();
+             if(juego.getFase()>3 && juego.getRonda() == 5){
                 musicaDeFondo.detenerMusica();
                 cambiarMusica(direccionMusica.get("boss"));
+             }
+             subeXp(2);
+             tiendaGUI.actualizarTiendaGui();
+             actualizarLabelRonda();
+            }else{
+                labelEsperando.setEnabled(true);
+                labelEsperando.setVisible(true);
+            }*/
+            jugador.setListoParaRonda(true);
+            if (juego.todosListosParaNuevaRonda()) {
+                juego.subirRonda();
+            } else {
+                labelEsperando.setEnabled(true);
+                labelEsperando.setVisible(true);
+                botonRonda.setEnabled(false);
             }
-            subeXp(2);
-            tiendaGUI.actualizarTiendaGui();
-            actualizarLabelRonda();
         });
 
         actualizarLabelNivel();
@@ -108,8 +121,7 @@ public class PokemonAutoChessGUI extends JFrame {
 
         panelConFondo.add(setupPanelInferior(), BorderLayout.SOUTH);
 
-        //bancaYTablero.setCantidadMaximaTablero(jugador.getNivel());
-        tablero.setCantidadMaximaTablero(jugador.getNivel());
+        tableroGUI.setCantidadMaximaTablero(jugador.getNivel());
 
         botonSubirNivel.addActionListener(e -> {
             if (jugador.getNivel() == 10) {
@@ -120,10 +132,9 @@ public class PokemonAutoChessGUI extends JFrame {
             }
         });
 
-        juego.subirRonda();
+        //juego.subirRonda();
         actualizarLabelRonda();
-        tiendaGUI.actualizarTiendaGui(); // Inicializa la tienda al arrancar
-        //cambiarOpaque(this);
+        tiendaGUI.actualizarTiendaGui();
         setContentPane(panelConFondo);
         revalidate();
         repaint();
@@ -133,17 +144,16 @@ public class PokemonAutoChessGUI extends JFrame {
         JPanel panelIzquierdo = new JPanel();
         panelIzquierdo.setLayout(new BoxLayout(panelIzquierdo, BoxLayout.Y_AXIS));
         panelIzquierdo.setOpaque(false);
-        //panelRasgos = bancaYTablero.getPanelRasgos();
-        panelRasgos = tablero.getPanelRasgos();
+        panelRasgos = tableroGUI.getPanelRasgos();
         panelRasgos.setOpaque(false);
         musicaDeFondo = new Sonidos();
         musicaDeFondo.reproducirMusica(direccionMusica.get("normal"));
 
-        JSlider sliderVolumen = new JSlider(JSlider.HORIZONTAL, -80, 6, -30);// Rango de -80 dB a 6 dB, valor inicial
+        JSlider sliderVolumen = new JSlider(JSlider.HORIZONTAL, -80, 6, -80);// Rango de -80 dB a 6 dB
         sliderVolumen.setOpaque(false);
         sliderVolumen.addChangeListener(e -> {
             int valor = sliderVolumen.getValue();
-            musicaDeFondo.ajustarVolumen((float) valor); // Ajustar el volumen según el valor del slider
+            musicaDeFondo.ajustarVolumen((float) valor);
         });
 
         panelIzquierdo.add(new JScrollPane(panelRasgos));
@@ -155,9 +165,8 @@ public class PokemonAutoChessGUI extends JFrame {
     JPanel panelCentroCompleto = new JPanel();
     panelCentroCompleto.setLayout(new BorderLayout());
     panelCentroCompleto.setOpaque(false);
-    //panelCentroCompleto.add(this.bancaYTablero, BorderLayout.CENTER);
-     panelCentroCompleto.add(tablero, BorderLayout.CENTER);
-     panelCentroCompleto.add(banca, BorderLayout.SOUTH);
+     panelCentroCompleto.add(tableroGUI, BorderLayout.CENTER);
+     panelCentroCompleto.add(bancaGUI, BorderLayout.SOUTH);
     return panelCentroCompleto;
 }
 
@@ -175,8 +184,8 @@ public class PokemonAutoChessGUI extends JFrame {
  }
 
  public JPanel setupPanelNorte(){
-    JPanel panelNorte = new JPanel();
-    panelNorte.setLayout(new FlowLayout(FlowLayout.LEFT));
+    JPanel panelNorte = new JPanel(new BorderLayout());
+    //panelNorte.setLayout(new FlowLayout(FlowLayout.LEFT));
     panelNorte.setOpaque(false);
     labelNivel = new JLabel();
     labelNivel.setHorizontalAlignment(SwingConstants.CENTER);
@@ -197,7 +206,7 @@ public class PokemonAutoChessGUI extends JFrame {
     panelInfo.add(labelNivel);
     panelInfo.add(Box.createRigidArea(new Dimension(10, 10)));
     panelInfo.add(labelMonedas);
-    panelNorte.add(panelInfo);
+    panelNorte.add(panelInfo,BorderLayout.WEST);
 
     JPanel panelFase = new JPanel();
     faseRonda = new JLabel();
@@ -211,7 +220,12 @@ public class PokemonAutoChessGUI extends JFrame {
     panelFase.add(Box.createRigidArea(new Dimension(10, 10)));
     panelFase.add(botonRonda);
     panelFase.setAlignmentX(Component.CENTER_ALIGNMENT);
-    panelNorte.add(panelFase);
+    labelEsperando = new JLabel("Esperando jugadores...");
+    labelEsperando.setEnabled(false);
+    labelEsperando.setVisible(false);
+
+    panelNorte.add(panelFase,BorderLayout.CENTER);
+    panelNorte.add(labelEsperando,BorderLayout.EAST);
 
     actualizarLabelRonda();
     return panelNorte;
@@ -225,8 +239,8 @@ public JPanel setupPanelInferior(){
     JPanel panelBotones = new JPanel();
     panelBotones.setLayout(new BoxLayout(panelBotones, BoxLayout.Y_AXIS));
     panelBotones.setOpaque(false);
-    panelBotones.add(juego.getLabelXP());
-    panelBotones.add(juego.getPanelXP());
+    panelBotones.add(jugadorGUI.getLabelXP());
+    panelBotones.add(jugadorGUI.getPanelXP());
 
     botonSubirNivel = new JButton("Comprar XP | 4");
     panelBotones.add(botonSubirNivel, BorderLayout.WEST);
@@ -367,11 +381,11 @@ public JPanel setupPanelInferior(){
     }
 
     public void subeXp(int xp){
-        juego.comprarXP(xp);
+        jugadorGUI.comprarXP(xp);
         tiendaGUI.actualizarLabelMonedas();
         actualizarLabelNivel();
         //bancaYTablero.setCantidadMaximaTablero(jugador.getNivel());
-        tablero.setCantidadMaximaTablero(jugador.getNivel());
+        tableroGUI.setCantidadMaximaTablero(jugador.getNivel());
     }
 
     /*void actualizarLabelJugadores() {
@@ -386,6 +400,30 @@ public JPanel setupPanelInferior(){
         faseRonda.repaint();
     }
 
+    @Override
+    public void actualizarRasgos(){}
+
+    @Override
+    public void notificar() {
+        actualizarLabelRonda();
+        tableroGUI.limpiarTableroEnemigo();
+        subeXp(2);
+        tiendaGUI.actualizarTiendaGui();
+        labelEsperando.setEnabled(false);
+        labelEsperando.setVisible(false);
+        juego.cambiarListosNull();
+        botonRonda.setEnabled(true);
+    }
+
+    @Override
+    public void notificarMensaje(String mensaje) {
+        JOptionPane.showMessageDialog(this, mensaje);
+    }
+
+    @Override
+    public void notificarError(String mensaje) {
+        JOptionPane.showMessageDialog(this, mensaje, "Error", JOptionPane.ERROR_MESSAGE);
+    }
 
     @Override
     public void dispose() {
