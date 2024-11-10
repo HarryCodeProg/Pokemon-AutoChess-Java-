@@ -25,12 +25,14 @@ public class Tablero {
         int fichasActualesEnTablero = contarFichasEnTablero();
 
         if (fichasActualesEnTablero >= cantidadMaximaTablero) {
-            System.out.println("No puedes colocar más fichas en el tablero");
+            System.out.println("No puedes colocar más fichas en el tableroCore");
             return;
         }
 
         if (celdasTablero[x][y] == null) {
             celdasTablero[x][y] = ficha;
+            ficha.getMovimiento().setFila(x);
+            ficha.getMovimiento().setColumna(y);
             agregarRasgosFicha(ficha);
             ordenarContadorRasgos();
             actualizarRasgos();
@@ -38,18 +40,32 @@ public class Tablero {
     }
 
     public void moverFicha(int xOrigen, int yOrigen, int xDestino, int yDestino) {
-        Ficha ficha = celdasTablero[xOrigen][yOrigen];
-        if (ficha != null && celdasTablero[xDestino][yDestino] == null) {
-            celdasTablero[xOrigen][yOrigen] = null;
-            celdasTablero[xDestino][yDestino] = ficha;
-        }
+        Ficha fichaOrigen = celdasTablero[xOrigen][yOrigen];
+        Ficha fichaDestino = celdasTablero[xDestino][yDestino];
+            if (fichaDestino == null) {
+                celdasTablero[xOrigen][yOrigen] = null;
+                celdasTablero[xDestino][yDestino] = fichaOrigen;
+                fichaOrigen.getMovimiento().setFila(xDestino);
+                fichaOrigen.getMovimiento().setColumna(yDestino);
+            }else{
+                celdasTablero[xOrigen][yOrigen] = fichaDestino;
+                fichaDestino.getMovimiento().setFila(xOrigen);
+                fichaDestino.getMovimiento().setColumna(yOrigen);
+                celdasTablero[xDestino][yDestino] = fichaOrigen;
+                fichaOrigen.getMovimiento().setFila(xDestino);
+                fichaOrigen.getMovimiento().setColumna(yDestino);
+            }
     }
 
     public void eliminarFicha(int x, int y) {
+        System.out.println("Intentando eliminar ficha en coordenadas: (" + x + ", " + y + ")");
         Ficha ficha = celdasTablero[x][y];
         if (ficha != null) {
             removerRasgosFicha(ficha);
             celdasTablero[x][y] = null;
+            String msj = String.format(
+                    "se elimino la ficha:%s",ficha.getNombre());
+            System.out.println(msj);
             actualizarRasgos();
         }
     }
@@ -68,19 +84,19 @@ public class Tablero {
         actualizarRasgos();
     }
 
-    private void actualizarContadorRasgos(Rasgo rasgo) {
+    public void actualizarContadorRasgos(Rasgo rasgo) {
         if (rasgo != null) {
             contadorRasgos.put(rasgo, contadorRasgos.getOrDefault(rasgo, 0) + 1);
         }
     }
 
-    private void removerContadorRasgos(Rasgo rasgo) {
+    public void removerContadorRasgos(Rasgo rasgo) {
         if (rasgo != null) {
             contadorRasgos.put(rasgo, contadorRasgos.getOrDefault(rasgo, 0) - 1);
         }
     }
 
-    private void ordenarContadorRasgos() {
+    public void ordenarContadorRasgos() {
         contadorRasgos = contadorRasgos.entrySet().stream()
                 .sorted(Map.Entry.<Rasgo, Integer>comparingByValue().reversed())
                 .collect(HashMap::new, (m, e) -> m.put(e.getKey(), e.getValue()), HashMap::putAll);
@@ -88,7 +104,7 @@ public class Tablero {
 
     public Map<Rasgo, Integer> getContadorRasgos() {return contadorRasgos;}
 
-    private int contarFichasEnTablero() {
+    public int contarFichasEnTablero() {
         int contador = 0;
         for (int fila = 0; fila < celdasTablero.length; fila++) {
             for (int columna = 0; columna < celdasTablero[fila].length; columna++) {
@@ -125,6 +141,9 @@ public class Tablero {
 
     public void setCantidadMaximaTablero(int cantidad) {this.cantidadMaximaTablero = cantidad;}
 
-    public void actualizarRasgos() {System.out.println("Rasgos actualizados: " + contadorRasgos);}
+    public int getCantidadMaximaTablero() {return this.cantidadMaximaTablero;}
+
+    public void actualizarRasgos() {//System.out.println("Rasgos actualizados: " + contadorRasgos);
+        }
 }
 

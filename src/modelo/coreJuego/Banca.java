@@ -47,13 +47,9 @@ public class Banca {
         }
     }
 
-    public Ficha getFichaSeleccionada() {
-        return fichaSeleccionada;
-    }
+    public Ficha getFichaSeleccionada() {return fichaSeleccionada;}
 
-    public void setTablero(Tablero tablero) {
-        this.tablero = tablero;
-    }
+    public void setTablero(Tablero tablero) {this.tablero = tablero;}
 
     public void eliminarFicha(Ficha ficha) {
         for (int i = 0; i < celdasBanca.length; i++) {
@@ -64,9 +60,7 @@ public class Banca {
         }
     }
 
-    public void seleccionarFicha(Ficha ficha) {
-        this.fichaSeleccionada = ficha;
-    }
+    public void seleccionarFicha(Ficha ficha) {this.fichaSeleccionada = ficha;}
 
     public void agregarFichaALaBanca(Ficha ficha) {
         for (int i = 0; i < celdasBanca.length; i++) {

@@ -18,7 +18,7 @@ public class Sonidos {
 
                 // Obtener control de volumen
                 volumenControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
-                volumenControl.setValue(-30.0f);
+                volumenControl.setValue(-80.0f);
 
                 // Reproducir el audio en bucle
                 clip.loop(Clip.LOOP_CONTINUOUSLY);

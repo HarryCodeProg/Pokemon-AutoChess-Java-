@@ -39,9 +39,9 @@ public class FichaMovimiento {
         return null;
     }
 
-    public void setFila(int y) {this.alcance = y;}
+    public void setFila(int x) {this.fila= x;}
 
-    public void setColumna(int x) {this.columna = x;}
+    public void setColumna(int y) {this.columna = y;}
 
     public int getAlcance() {
         return alcance;

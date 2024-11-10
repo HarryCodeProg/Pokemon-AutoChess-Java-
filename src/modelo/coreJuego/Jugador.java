@@ -15,12 +15,15 @@ public class Jugador implements Serializable {
     private boolean listoParaRonda;
     private BancaGUI banca;
     private TableroGUI tablero;
+    private Tablero tableroCore;
+    private Banca bancaCore;
 
     public Jugador(String nombreS) {
         this.nombre = nombreS;
         this.vida = 100;
         this.listoParaRonda = false;
-        tablero = new TableroGUI();
+        this.tableroCore = new Tablero();
+        tablero = new TableroGUI(tableroCore);
     }
 
     public int getNivel() {

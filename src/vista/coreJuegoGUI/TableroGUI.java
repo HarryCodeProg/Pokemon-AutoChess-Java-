@@ -1,5 +1,6 @@
 package vista.coreJuegoGUI;
 
+import modelo.coreJuego.Tablero;
 import modelo.coreJuego.fichas.Ficha;
 import modelo.coreJuego.fichas.Rasgo;
 import modelo.coreJuego.fichas.Rasgos;
@@ -16,15 +17,13 @@ import java.util.Map;
 public class TableroGUI extends JPanel{
     private JPanel[][] celdasTablero;
     private FichaClickeableGUI fichaTablero = null;
-    private int cantidadMaximaTablero;
-    private Map<Rasgo, Integer> contadorRasgos = new HashMap<>();
-    //private ArrayList<Observador> observadores;
     private JPanel panelRasgos;
     private BancaGUI banca;
+    private Tablero tableroCore;
 
-    public TableroGUI(){
+    public TableroGUI(Tablero tableroC){
+        this.tableroCore = tableroC;
         setLayout(new BorderLayout());
-
         JPanel tablero = inicializarTablero();
         tablero.setOpaque(false);
         panelRasgos = new JPanel();
@@ -56,7 +55,7 @@ public class TableroGUI extends JPanel{
                             System.out.println("fila incorrecta");
                         } else {
                             if (banca.getFichaDeLaBanca() != null) {
-                                colocarFichaEnTablero(celda, cantidadMaximaTablero);
+                                colocarFichaEnTablero(celda, tableroCore.getCantidadMaximaTablero());
                             }else if (celdasTablero[filaFinal][columnaFinal].getComponentCount() > 0 && fichaTablero == null) {
                                 banca.seleccionarFicha((FichaClickeableGUI) celdasTablero[filaFinal][columnaFinal].getComponent(0));
                             } else if (fichaTablero != null) {
@@ -87,6 +86,8 @@ public class TableroGUI extends JPanel{
         if (!estaCeldaOcupada(x, y)){
             FichaClickeableGUI fichagui = new FichaClickeableGUI(ficha);
             fichagui.setBanca(banca);
+            fichagui.getFicha().getMovimiento().setFila(x);
+            fichagui.getFicha().getMovimiento().setColumna(x);
             this.celdasTablero[x][y].add(fichagui);
             fichagui.iniciarAnimacion();
         }
@@ -123,8 +124,8 @@ public class TableroGUI extends JPanel{
                 celdaAnterior.remove(fichaTablero);
                 celdaNueva.add(fichaTablero);
             }
+            tableroCore.moverFicha(getCoorCelda(celdaAnterior,true),getCoorCelda(celdaAnterior,false),getCoorCelda(celdaNueva,true),getCoorCelda(celdaNueva,false));
 
-            // Actualizar las celdas para reflejar los cambios
             celdaAnterior.revalidate();
             celdaAnterior.repaint();
             celdaNueva.revalidate();
@@ -136,10 +137,10 @@ public class TableroGUI extends JPanel{
     }
 
     public void colocarFichaEnTablero(JPanel celdaTablero, int cantidadFichaMaximo) {
+        //int fichasActualesEnTablero = contarFichasEnTablero();
         int fichasActualesEnTablero = contarFichasEnTablero();
 
         if (fichasActualesEnTablero >= cantidadFichaMaximo) {
-            System.out.println("No puedes colocar más fichas en el tablero");
             JOptionPane.showMessageDialog(this,"No puedes colocar más fichas en el tablero");
             return;
         }
@@ -152,15 +153,18 @@ public class TableroGUI extends JPanel{
                 parent.repaint();
             }
 
+            int coorX = getCoorCelda(celdaTablero,true);
+            int coorY = getCoorCelda(celdaTablero,false);
             banca.getFichaDeLaBanca().animacionArriba();
             celdaTablero.add(banca.getFichaDeLaBanca());
             celdaTablero.revalidate();
             celdaTablero.repaint();
             banca.getFichaDeLaBanca().setBorder(null);
+            tableroCore.colocarFicha(coorX,coorY,banca.getFichaDeLaBanca().getFicha());
 
             if(!fichaEstaEnTablero(banca.getFichaDeLaBanca(),false)){
-                agregarRasgosFicha(banca.getFichaDeLaBanca());
-                ordenarContadorRasgos();
+                //agregarRasgosFicha(banca.getFichaDeLaBanca());
+                tableroCore.ordenarContadorRasgos();
                 actualizarRasgos();
             }
             fichaTablero = null;
@@ -168,41 +172,41 @@ public class TableroGUI extends JPanel{
         }
     }
 
+    public int getCoorCelda(JPanel celda, boolean x) {
+        int fila = -1;
+        int columna = -1;
+        boolean encontrada = false;
+        for (int i = 0; i < 6; i++) {
+            for (int j = 0; j < 6; j++) {
+                if (celdasTablero[i][j] == celda) {
+                    fila = i; columna = j;
+                    encontrada = true;
+                    break;
+                }
+            }
+            if (encontrada) break;
+        } if (x) {
+            return fila;
+        } else {
+            return columna;
+        }
+    }
+
     public void removerRasgosFicha(FichaClickeableGUI ficha){
-        removerContadorRasgos(ficha.getFicha().getRasgo1());
-        removerContadorRasgos(ficha.getFicha().getRasgo2());
-        removerContadorRasgos(ficha.getFicha().getRasgo3());
+        tableroCore.removerContadorRasgos(ficha.getFicha().getRasgo1());
+        tableroCore.removerContadorRasgos(ficha.getFicha().getRasgo2());
+        tableroCore.removerContadorRasgos(ficha.getFicha().getRasgo3());
         actualizarRasgos();
     }
 
     public void agregarRasgosFicha(FichaClickeableGUI ficha){
-        actualizarContadorRasgos(ficha.getFicha().getRasgo1());
-        actualizarContadorRasgos(ficha.getFicha().getRasgo2());
-        actualizarContadorRasgos(ficha.getFicha().getRasgo3());
+        tableroCore.actualizarContadorRasgos(ficha.getFicha().getRasgo1());
+        tableroCore.actualizarContadorRasgos(ficha.getFicha().getRasgo2());
+        tableroCore.actualizarContadorRasgos(ficha.getFicha().getRasgo3());
         actualizarRasgos();
     }
 
-    public void removerContadorRasgos(Rasgo rasgo) {
-        if (rasgo != null) {
-            contadorRasgos.put(rasgo, contadorRasgos.getOrDefault(rasgo, 0) - 1);
-        }
-    }
-
-    private void actualizarContadorRasgos(Rasgo rasgo) {
-        if (rasgo != null) {
-            contadorRasgos.put(rasgo, contadorRasgos.getOrDefault(rasgo, 0) + 1);
-        }
-    }
-
-    private void ordenarContadorRasgos() {
-        contadorRasgos = contadorRasgos.entrySet().stream()
-                .sorted(Map.Entry.<Rasgo, Integer>comparingByValue().reversed())
-                .collect(HashMap::new, (m, e) -> m.put(e.getKey(), e.getValue()), HashMap::putAll);
-    }
-
-    public Map<Rasgo, Integer> getContadorRasgos() {
-        return contadorRasgos;
-    }
+    public Map<Rasgo, Integer> getContadorRasgos() {return tableroCore.getContadorRasgos();}
 
     private int contarFichasEnTablero() {
         int contador = 0;
@@ -239,10 +243,6 @@ public class TableroGUI extends JPanel{
         return contador >= 1;
     }
 
-    public void setCantidadMaximaTablero(int cantidad){
-        this.cantidadMaximaTablero = cantidad;
-    }
-
     public void sacarFichaTablero(Ficha ficha) {
         for (int fila = 3; fila < 6; fila++) {
             for (int columna = 0; columna < 6; columna++) {
@@ -258,6 +258,7 @@ public class TableroGUI extends JPanel{
                         }
                         actualizarRasgos();
                         celdasTablero[fila][columna].remove(fichaEnCelda);
+                        tableroCore.eliminarFicha(fila,columna);
                         celdasTablero[fila][columna].revalidate();
                         celdasTablero[fila][columna].repaint();
                         this.fichaTablero = null;
@@ -312,7 +313,7 @@ public class TableroGUI extends JPanel{
                 ImageIcon imagenRasgo = rasgo.getImagenRasgo();
                 // Redimensionar la imagen del rasgo
                 Image imgRasgo = imagenRasgo.getImage();
-                Image imgRasgoEscalada = imgRasgo.getScaledInstance(80, 30, java.awt.Image.SCALE_SMOOTH);
+                Image imgRasgoEscalada = imgRasgo.getScaledInstance(80, 30, Image.SCALE_SMOOTH);
                 ImageIcon imagenRasgoEscalada = new ImageIcon(imgRasgoEscalada);
                 JLabel etiquetaImagen = new JLabel(imagenRasgoEscalada);
                 panelRasgo.add(etiquetaImagen);
@@ -328,4 +329,7 @@ public class TableroGUI extends JPanel{
     }
 
     public JPanel getPanelRasgos(){return this.panelRasgos;}
+
+    public Tablero getTableroCore(){return this.tableroCore;}
+
 }

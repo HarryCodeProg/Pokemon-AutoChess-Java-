@@ -3,6 +3,7 @@ package vista.coreJuegoGUI;
 import javax.swing.*;
 
 import controlador.Observador;
+import modelo.coreJuego.Banca;
 import modelo.music.Sonidos;
 import modelo.coreJuego.Tienda;
 import modelo.coreJuego.Jugador;
@@ -66,6 +67,8 @@ public class PokemonAutoChessGUI extends JFrame implements Observador {
         tiendaGUI = new TiendaGUI(tienda,jugador);
         bancaGUI = new BancaGUI();
         tableroGUI = jugador.getTablero();
+        bancaGUI.getBancaCore().setTablero(tableroGUI.getTableroCore());
+        tableroGUI.getTableroCore().setBanca(bancaGUI.getBancaCore());
         bancaGUI.setTablero(tableroGUI);
         tableroGUI.setBanca(bancaGUI);
 
@@ -90,21 +93,6 @@ public class PokemonAutoChessGUI extends JFrame implements Observador {
         panelConFondo.add(setupPanelNorte(), BorderLayout.NORTH);
 
         botonRonda.addActionListener(e -> {
-            /*jugador.setListoParaRonda(true);
-            if (juego.todosListosParaNuevaRonda()) {
-             tableroGUI.limpiarTableroEnemigo();
-             juego.subirRonda();
-             if(juego.getFase()>3 && juego.getRonda() == 5){
-                musicaDeFondo.detenerMusica();
-                cambiarMusica(direccionMusica.get("boss"));
-             }
-             subeXp(2);
-             tiendaGUI.actualizarTiendaGui();
-             actualizarLabelRonda();
-            }else{
-                labelEsperando.setEnabled(true);
-                labelEsperando.setVisible(true);
-            }*/
             jugador.setListoParaRonda(true);
             if (juego.todosListosParaNuevaRonda()) {
                 juego.subirRonda();
@@ -121,7 +109,7 @@ public class PokemonAutoChessGUI extends JFrame implements Observador {
 
         panelConFondo.add(setupPanelInferior(), BorderLayout.SOUTH);
 
-        tableroGUI.setCantidadMaximaTablero(jugador.getNivel());
+        tableroGUI.getTableroCore().setCantidadMaximaTablero(jugador.getNivel());
 
         botonSubirNivel.addActionListener(e -> {
             if (jugador.getNivel() == 10) {
@@ -385,7 +373,7 @@ public JPanel setupPanelInferior(){
         tiendaGUI.actualizarLabelMonedas();
         actualizarLabelNivel();
         //bancaYTablero.setCantidadMaximaTablero(jugador.getNivel());
-        tableroGUI.setCantidadMaximaTablero(jugador.getNivel());
+        tableroGUI.getTableroCore().setCantidadMaximaTablero(jugador.getNivel());
     }
 
     /*void actualizarLabelJugadores() {

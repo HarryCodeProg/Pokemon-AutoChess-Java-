@@ -1,5 +1,5 @@
 package modelo.coreJuego;
 
 public enum EstadosJuego {
-    COMPRA, PELEANDO,FINPELEA, FINPARTIDA
+    INICIO_PARTIDA, PREPARACION, PELEA, FIN_DE_RONDA, FIN_PARTIDA
 }

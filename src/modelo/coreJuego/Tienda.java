@@ -105,9 +105,11 @@ public class Tienda {
             todasLasFichas.add(new Ficha("Stonjourner",rock,support,fight,5,1,1000,30,200,200,35,35,"/modelo/images/pokemon/mini/38- stonjourner.png","/modelo/images/pokemon/38- stonjourner.png"));
         }
         krabby = new Ficha("Krabby", fight, fight, fight, 1,1,300,40,100,100,15,15,"/modelo/images/pve/Normal.png","/modelo/images/pve/Swing.png");
+        krabby.esFichaEnemiga();
         rattata = new Ficha("Rattata",fight,fight,fight, 1,1,300,40,100,100,15,15,"/modelo/images/pokemon/mini/30- rattata.png","/modelo/images/pokemon/30- rattata.png");
+        rattata.esFichaEnemiga();
         regigigas = new Ficha("Regigigas",fight,fight,fight,5,1,1000,30,200,200,35,35,"/modelo/images/pokemon/mini/32- regigigas.png","/modelo/images/pve/regigigas.png");
-
+        regigigas.esFichaEnemiga();
     }
 
     public List<Ficha> getTodasLasFichas(){return this.todasLasFichas;}

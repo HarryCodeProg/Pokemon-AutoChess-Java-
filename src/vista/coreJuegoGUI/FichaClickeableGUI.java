@@ -171,7 +171,11 @@ public class FichaClickeableGUI extends JLabel {
         barraVida.removeAll();
         barraVida.setLayout(new BorderLayout());
         JPanel vidaActual = new JPanel();
-        vidaActual.setBackground(Color.GREEN);
+        if(this.ficha.getFichaEnemiga()){
+            vidaActual.setBackground(Color.RED);
+        }else{
+            vidaActual.setBackground(Color.GREEN);
+        }
         vidaActual.setPreferredSize(new Dimension(anchoBarraVida, barraVida.getPreferredSize().height));
 
         JPanel vidaRestante = new JPanel();
@@ -207,9 +211,7 @@ public class FichaClickeableGUI extends JLabel {
         barraMana.repaint();
     }
 
-    public Ficha getFicha() {
-        return this.ficha;
-    }
+    public Ficha getFicha() {return this.ficha;}
 
     private JPanel crearPanelConNombre(ImageIcon imagen, String nombre) {
         JPanel panel = new JPanel();

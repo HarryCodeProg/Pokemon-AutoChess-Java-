@@ -16,6 +16,7 @@ public class Juego {
     private ArrayList<Jugador> ordenDeRivales;
     private int indiceRival;
     private ArrayList<Observador> observadores = new ArrayList<>();
+    private EstadosJuego estadoActual = EstadosJuego.INICIO_PARTIDA;
 
     public Juego(Tienda tienda) {
         this.jugadores = new ArrayList<>();
@@ -31,6 +32,18 @@ public class Juego {
         this.indiceRival = 0;
     }
 
+    public void iniciarPreparacion() {
+        estadoActual = EstadosJuego.PREPARACION;
+        notificarObservadores();
+        rondas();
+    }
+
+    public void comenzarPelea() {
+        estadoActual = EstadosJuego.PELEA;
+        notificarObservadores();
+        rondas();
+    }
+
     public Jugador elegirSiguienteRival() {
         Jugador rival = ordenDeRivales.get(indiceRival);
         indiceRival = (indiceRival + 1) % ordenDeRivales.size();
@@ -43,9 +56,80 @@ public class Juego {
 
     public void sacarJugador(Jugador jugador){jugadores.remove(jugador);}
 
-    public void empezarRondaPelea() {
-
+    public void agregarRattata(int cantidad,Jugador jugador){
+        for (int i = 0; i <cantidad;i++){
+                jugador.getTablero().añadirAlTableroPorCoor(1,i+1,tienda.getRattata());
+        }
     }
+
+    public void agregarRegigigas(Jugador jugador){jugador.getTablero().añadirAlTableroPorCoor(1,2,tienda.getRegigigas());}
+
+    public void subirRonda(){
+        if (ronda == 5){
+            ronda = 1;
+            fase++;
+        }else{
+          ronda++;
+        }
+        estadoActual = EstadosJuego.FIN_DE_RONDA;
+        //notificar();
+        notificarObservadores();
+        for (Jugador jugador : jugadores){
+            jugador.actualizarMonedasRonda();
+        }
+        //rondas();
+        iniciarPreparacion();
+    }
+
+    public boolean todosListosParaNuevaRonda() {
+        for (Jugador jugador : jugadores) {
+            if (!jugador.estaListoParaRonda()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public void cambiarListosNull(){
+        for (Jugador jugador : jugadores) {
+            jugador.setListoParaRonda(false);
+        }
+    }
+
+    public void reiniciarEstadoDeRonda() {
+        for (Jugador jugador : jugadores) {
+            jugador.setListoParaRonda(false);
+        }
+    }
+
+    public void iniciarRondaPvp() {
+       for (int i = 0; i < jugadores.size(); i++) {
+           Jugador jugador1 = jugadores.get(i);
+           Jugador jugador2 = jugadores.get((i + 1) % jugadores.size());
+           transferirFichasPvp(jugador1, jugador2);
+       }
+    }
+
+    private void transferirFichasPvp(Jugador jugador1, Jugador jugador2) {
+        TableroGUI tablero1 = jugador1.getTablero();
+        TableroGUI tablero2 = jugador2.getTablero();
+        tablero1.limpiarTableroEnemigo();
+
+        for (int fila = 3; fila <= 5; fila++) {
+            for (int columna = 0; columna <= 5; columna++) {
+                if (tablero2.estaCeldaOcupada(fila, columna)) {
+                    FichaClickeableGUI ficha = tablero2.getFichaEnCelda(fila, columna);
+                    ficha.getFicha().esFichaEnemiga();
+                    int filaOpuesta = 5 - fila;
+                    tablero1.añadirAlTableroPorCoor(filaOpuesta, columna, ficha.getFicha());
+                }
+            }
+        }
+    }
+
+    public int getFase(){return this.fase;}
+
+    public int getRonda(){return this.ronda;}
 
     public void rondas(){
         if (fase == 1){
@@ -100,82 +184,12 @@ public class Juego {
 
     }
 
-    public void agregarRattata(int cantidad,Jugador jugador){
-        for (int i = 0; i <cantidad;i++){
-                jugador.getTablero().añadirAlTableroPorCoor(1,i+1,tienda.getRattata());
-        }
-    }
-
-    public void agregarRegigigas(Jugador jugador){jugador.getTablero().añadirAlTableroPorCoor(1,2,tienda.getRegigigas());}
-
-    public void subirRonda(){
-        if (ronda == 5){
-            ronda = 1;
-            fase++;
-        }else{
-          ronda++;
-        }
-        notificar();
-        for (Jugador jugador : jugadores){
-            jugador.actualizarMonedasRonda();
-        }
-        rondas();
-    }
-
-    public boolean todosListosParaNuevaRonda() {
-        for (Jugador jugador : jugadores) {
-            if (!jugador.estaListoParaRonda()) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    public void cambiarListosNull(){
-        for (Jugador jugador : jugadores) {
-            jugador.setListoParaRonda(false);
-        }
-    }
-
-    public void reiniciarEstadoDeRonda() {
-        for (Jugador jugador : jugadores) {
-            jugador.setListoParaRonda(false);
-        }
-    }
-
-    public void iniciarRondaPvp() {
-       for (int i = 0; i < jugadores.size(); i++) {
-           Jugador jugador1 = jugadores.get(i);
-           Jugador jugador2 = jugadores.get((i + 1) % jugadores.size());
-           transferirFichasPvp(jugador1, jugador2);
-       }
-    }
-
-    private void transferirFichasPvp(Jugador jugador1, Jugador jugador2) {
-        TableroGUI tablero1 = jugador1.getTablero();
-        TableroGUI tablero2 = jugador2.getTablero();
-        tablero1.limpiarTableroEnemigo();
-
-        for (int fila = 3; fila <= 5; fila++) {
-            for (int columna = 0; columna <= 5; columna++) {
-                if (tablero2.estaCeldaOcupada(fila, columna)) {
-                    FichaClickeableGUI ficha = tablero2.getFichaEnCelda(fila, columna);
-                    int filaOpuesta = 5 - fila;
-                    tablero1.añadirAlTableroPorCoor(filaOpuesta, columna, ficha.getFicha());
-                }
-            }
-        }
-    }
-
-    public int getFase(){return this.fase;}
-
-    public int getRonda(){return this.ronda;}
-
     public void agregarObservador(Observador observador) { observadores.add(observador); }
     public void eliminarObservador(Observador observador) { observadores.remove(observador); }
     public void notificarObservadores() {
         for (Observador observador : observadores) {
-                        observador.actualizarRasgos(); observador.notificar();
+                        observador.actualizarRasgos();
+                        observador.notificar();
         }
     }
 

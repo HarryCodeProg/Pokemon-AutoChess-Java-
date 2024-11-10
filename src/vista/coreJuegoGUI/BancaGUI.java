@@ -1,6 +1,7 @@
 package vista.coreJuegoGUI;
 
 import controlador.Observador;
+import modelo.coreJuego.Banca;
 
 import javax.swing.*;
 import java.awt.*;
@@ -15,9 +16,11 @@ public class BancaGUI extends JPanel{
     private FichaClickeableGUI fichaDeLaBanca = null;
     private ArrayList<Observador> observadores;
     private TableroGUI tablero;
+    private Banca bancaCore;
 
  public BancaGUI(){
      setLayout(new BorderLayout());
+     this.bancaCore = new Banca();
 
      JPanel panelBanca = inicializarBanca();
      panelBanca.setOpaque(false);
@@ -84,7 +87,11 @@ public class BancaGUI extends JPanel{
 
     public void moverFichaABancaDesdeTablero(FichaClickeableGUI ficha, JPanel celdaDestino) {
         JPanel celdaOrigen = (JPanel) ficha.getParent();
+        int filaOrigen = ficha.getFicha().getMovimiento().getFila();
+        int columnaOrigen = ficha.getFicha().getMovimiento().getColumna();
+        System.out.println("Movimiento ficha desde: (" + filaOrigen + ", " + columnaOrigen + ") a banca");
         if (celdaDestino.getComponentCount() == 0) {
+            tablero.getTableroCore().eliminarFicha(filaOrigen, columnaOrigen);
             celdaDestino.add(ficha);
             celdaOrigen.remove(ficha);
             if (!tablero.fichaEstaEnTablero(ficha,false)) {
@@ -96,6 +103,8 @@ public class BancaGUI extends JPanel{
             ficha.setBorder(null);
         } else {
             FichaClickeableGUI fichaEnBanca = (FichaClickeableGUI) celdaDestino.getComponent(0);
+            tablero.getTableroCore().eliminarFicha(filaOrigen, columnaOrigen);
+            tablero.getTableroCore().colocarFicha(tablero.getCoorCelda(celdaDestino, true), tablero.getCoorCelda(celdaDestino, false), fichaEnBanca.getFicha());
             celdaDestino.remove(fichaEnBanca);
             celdaDestino.add(ficha);
             celdaOrigen.remove(ficha);
@@ -281,4 +290,6 @@ public class BancaGUI extends JPanel{
             tablero.sacarFichaTablero(ficha2.getFicha());
         }
     }
+
+    public Banca getBancaCore() {return bancaCore;}
 }

@@ -1,5 +1,7 @@
 package modelo.coreJuego.fichas;
 
+import modelo.coreJuego.Tablero;
+
 import java.awt.*;
 import javax.swing.ImageIcon;
 
@@ -18,6 +20,7 @@ public class Ficha {
     private String nombreEvolucion1;
     private String nombreEvolucion2;
     private boolean fichaEnemiga = false;
+    private Tablero tablero;
 
 
     public Ficha(String nombre, Rasgo rasgo1, Rasgo rasgo2, Rasgo rasgo3, int coste,int mov,int vida,int costeU ,int danoFisico, int dañoAP, int defensaFisica, int defensaAP,String rutaImagen,String rutaSprite) {
@@ -107,10 +110,10 @@ public class Ficha {
         }
 
         if (!enemigo.estaViva()) {
-            /*Ficha nuevoEnemigo = buscarEnemigoCercano(tablero, this.fila, this.columna);
+            Ficha nuevoEnemigo = movimiento.buscarEnemigoCercano(this.tablero.getTablero(), this.movimiento.getFila(), this.movimiento.getColumna());
             if (nuevoEnemigo != null) {
                 atacar(nuevoEnemigo);
-            }*/
+            }
         }
     }
 
