@@ -36,13 +36,13 @@ public class Banca {
         if (posicionDestino >= 0 && posicionDestino < celdasBanca.length) {
             if (celdasBanca[posicionDestino] == null) {
                 celdasBanca[posicionDestino] = ficha;
-                tablero.eliminarFicha(ficha.getMovimiento().getFila(),ficha.getMovimiento().getColumna());
+                tablero.eliminarFicha(ficha.getMovimiento().getFilaOriginal(),ficha.getMovimiento().getColumnaOriginal());
             } else {
                 // Intercambio de fichas entre el tablero y la banca
                 Ficha fichaEnBanca = celdasBanca[posicionDestino];
                 celdasBanca[posicionDestino] = ficha;
-                tablero.colocarFicha(ficha.getMovimiento().getFila(),ficha.getMovimiento().getColumna(),fichaEnBanca);
-                tablero.eliminarFicha(ficha.getMovimiento().getFila(),ficha.getMovimiento().getColumna());
+                tablero.colocarFicha(ficha.getMovimiento().getFilaOriginal(),ficha.getMovimiento().getColumnaOriginal(),fichaEnBanca);
+                tablero.eliminarFicha(ficha.getMovimiento().getFilaOriginal(),ficha.getMovimiento().getColumnaOriginal());
             }
         }
     }

@@ -1,5 +1,6 @@
 package vista.coreJuegoGUI;
 
+import controlador.Observador;
 import modelo.coreJuego.Jugador;
 import modelo.coreJuego.Tienda;
 import modelo.coreJuego.fichas.Ficha;
@@ -112,9 +113,13 @@ public class TiendaGUI extends JPanel{
             @Override
             public void mouseClicked(MouseEvent e) {
                     if (jugador.getBanca().getFichaDeLaBanca()!= null){
+                        jugador.sumarMonedas(jugador.getBanca().getFichaDeLaBanca().getFicha().getCoste());
+                        actualizarLabelMonedas();
                         tienda.agregarFichaAlPool(jugador.getBanca().getFichaDeLaBanca().getFicha(),jugador.getBanca().getFichaDeLaBanca().getFicha().getEstrellas()/3);
                         jugador.getBanca().eliminarFichaSeleccionada(jugador.getBanca().getFichaDeLaBanca());
                     }else if(jugador.getTablero().getFichaTablero()!= null){
+                        jugador.sumarMonedas(jugador.getTablero().getFichaTablero().getFicha().getCoste());
+                        actualizarLabelMonedas();
                         tienda.agregarFichaAlPool(jugador.getTablero().getFichaTablero().getFicha(),jugador.getTablero().getFichaTablero().getFicha().getEstrellas()/3);
                         jugador.getTablero().sacarFichaTablero(jugador.getTablero().getFichaTablero().getFicha());
                         jugador.getBanca().eliminarFichaSeleccionada(jugador.getTablero().getFichaTablero());

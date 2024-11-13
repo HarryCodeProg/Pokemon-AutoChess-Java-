@@ -87,8 +87,8 @@ public class BancaGUI extends JPanel{
 
     public void moverFichaABancaDesdeTablero(FichaClickeableGUI ficha, JPanel celdaDestino) {
         JPanel celdaOrigen = (JPanel) ficha.getParent();
-        int filaOrigen = ficha.getFicha().getMovimiento().getFila();
-        int columnaOrigen = ficha.getFicha().getMovimiento().getColumna();
+        int filaOrigen = ficha.getFicha().getMovimiento().getFilaOriginal();
+        int columnaOrigen = ficha.getFicha().getMovimiento().getColumnaOriginal();
         System.out.println("Movimiento ficha desde: (" + filaOrigen + ", " + columnaOrigen + ") a banca");
         if (celdaDestino.getComponentCount() == 0) {
             tablero.getTableroCore().eliminarFicha(filaOrigen, columnaOrigen);

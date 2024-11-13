@@ -254,7 +254,6 @@ public class TableroGUI extends JPanel{
                         FichaClickeableGUI gui = new FichaClickeableGUI(ficha);
                         if(!fichaEstaEnTablero(gui,true) ){
                            removerRasgosFicha(gui);
-                           System.out.print("aca deberia entrar al vender jijijeja");
                         }
                         actualizarRasgos();
                         celdasTablero[fila][columna].remove(fichaEnCelda);
@@ -326,6 +325,14 @@ public class TableroGUI extends JPanel{
         }
         panelRasgos.revalidate();
         panelRasgos.repaint();
+    }
+
+    public void habilitarTablero(boolean habilitar) {
+        for (int fila = 0; fila < 6; fila++) {
+            for (int columna = 0; columna < 6; columna++) {
+                celdasTablero[fila][columna].setEnabled(habilitar);
+            }
+        }
     }
 
     public JPanel getPanelRasgos(){return this.panelRasgos;}

@@ -23,7 +23,7 @@ public class Controlador extends UnicastRemoteObject implements IControlador {
         this.vista = vista;
         this.jugadores = jugadores;
 
-        // Suscripción de botones en la vista
+        // suscripcion de botones en la vista
         vista.addListenerBotonRonda(e -> {
             try {
                 jugadorPresionaBotonRonda(vista.getJugador());
@@ -51,7 +51,7 @@ public class Controlador extends UnicastRemoteObject implements IControlador {
     }
 
     public void actualizarJugadoresEnVista() throws RemoteException {
-        jugadores.sort((j1, j2) -> Integer.compare(j2.getVida(), j1.getVida()));  // Ordenar por vida descendente
+        jugadores.sort((j1, j2) -> Integer.compare(j2.getVida(), j1.getVida()));  // ordenar por vida descendente
         vista.actualizarJugadoresPorVida(jugadores);
     }
 

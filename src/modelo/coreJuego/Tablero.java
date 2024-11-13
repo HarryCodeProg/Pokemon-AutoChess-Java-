@@ -58,14 +58,10 @@ public class Tablero {
     }
 
     public void eliminarFicha(int x, int y) {
-        System.out.println("Intentando eliminar ficha en coordenadas: (" + x + ", " + y + ")");
         Ficha ficha = celdasTablero[x][y];
         if (ficha != null) {
             removerRasgosFicha(ficha);
             celdasTablero[x][y] = null;
-            String msj = String.format(
-                    "se elimino la ficha:%s",ficha.getNombre());
-            System.out.println(msj);
             actualizarRasgos();
         }
     }
@@ -139,11 +135,29 @@ public class Tablero {
         return false;
     }
 
+    public boolean noTieneFichas() {
+        for (int fila = 0; fila < 6; fila++) {
+            for (int columna = 0; columna < 6; columna++) {
+                if (celdasTablero[fila][columna] != null) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+
+
+    public boolean estaCeldaOcupada(int x,int y){return celdasTablero[x][y] != null;}
+
+    public Ficha getFichaEnCelda(int x, int y) {return celdasTablero[x][y];}
+
     public void setCantidadMaximaTablero(int cantidad) {this.cantidadMaximaTablero = cantidad;}
 
     public int getCantidadMaximaTablero() {return this.cantidadMaximaTablero;}
 
     public void actualizarRasgos() {//System.out.println("Rasgos actualizados: " + contadorRasgos);
         }
+
 }
 

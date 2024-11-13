@@ -3,11 +3,8 @@ package vista.coreJuegoGUI;
 import javax.swing.*;
 
 import controlador.Observador;
-import modelo.coreJuego.Banca;
+import modelo.coreJuego.*;
 import modelo.music.Sonidos;
-import modelo.coreJuego.Tienda;
-import modelo.coreJuego.Jugador;
-import modelo.coreJuego.Juego;
 
 import java.awt.*;
 import java.awt.event.ActionListener;
@@ -39,12 +36,14 @@ public class PokemonAutoChessGUI extends JFrame implements Observador {
     private JugadorGUI jugadorGUI;
     private Juego juego;
     private JLabel labelEsperando;
+    private JLabel labelTemporizador;
 
     public PokemonAutoChessGUI(Jugador jugadorN, ArrayList todosJugadores,Juego juego,Tienda tiendax) {
         setTitle("Pokemon AutoChess");
         setExtendedState(JFrame.MAXIMIZED_BOTH); // Pantalla completa
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
+
         juego.agregarObservador(this);
 
         inicializarMusica();
@@ -105,7 +104,6 @@ public class PokemonAutoChessGUI extends JFrame implements Observador {
 
         actualizarLabelNivel();
         tiendaGUI.actualizarLabelMonedas();
-
 
         panelConFondo.add(setupPanelInferior(), BorderLayout.SOUTH);
 
@@ -197,6 +195,7 @@ public class PokemonAutoChessGUI extends JFrame implements Observador {
     panelNorte.add(panelInfo,BorderLayout.WEST);
 
     JPanel panelFase = new JPanel();
+    labelTemporizador = new JLabel();
     faseRonda = new JLabel();
     faseRonda.setForeground(blancoFondo);
     faseRonda.setBackground(negroFondo);
@@ -208,6 +207,7 @@ public class PokemonAutoChessGUI extends JFrame implements Observador {
     panelFase.add(Box.createRigidArea(new Dimension(10, 10)));
     panelFase.add(botonRonda);
     panelFase.setAlignmentX(Component.CENTER_ALIGNMENT);
+    panelFase.add(labelTemporizador);
     labelEsperando = new JLabel("Esperando jugadores...");
     labelEsperando.setEnabled(false);
     labelEsperando.setVisible(false);
@@ -310,31 +310,6 @@ public JPanel setupPanelInferior(){
         musicaDeFondo.reproducirMusica(dir);
     }
 
-    private void cambiarColorDeFondo(Component componente, Color color) {
-        if (componente instanceof JPanel || componente instanceof JLabel) {
-            componente.setBackground(color);
-        }
-
-        // Si el componente es un contenedor (como JPanel), recorrer sus hijos
-        if (componente instanceof Container) {
-            for (Component child : ((Container) componente).getComponents()) {
-                cambiarColorDeFondo(child, color);
-            }
-        }
-    }
-
-    public void cambiarOpaque(Container container) {
-        if (container instanceof JComponent) {
-            ((JComponent) container).setOpaque(false);
-        }
-
-        for (Component component : container.getComponents()) {
-            if (component instanceof Container) {
-                cambiarOpaque((Container) component);
-            }
-        }
-    }
-
     public void addListenerBotonRonda(ActionListener listener) {
         botonRonda.addActionListener(listener);
     }
@@ -372,7 +347,6 @@ public JPanel setupPanelInferior(){
         jugadorGUI.comprarXP(xp);
         tiendaGUI.actualizarLabelMonedas();
         actualizarLabelNivel();
-        //bancaYTablero.setCantidadMaximaTablero(jugador.getNivel());
         tableroGUI.getTableroCore().setCantidadMaximaTablero(jugador.getNivel());
     }
 
@@ -392,15 +366,27 @@ public JPanel setupPanelInferior(){
     public void actualizarRasgos(){}
 
     @Override
-    public void notificar() {
+    public void notificarRonda() {
         actualizarLabelRonda();
         tableroGUI.limpiarTableroEnemigo();
-        subeXp(2);
-        tiendaGUI.actualizarTiendaGui();
+        if (juego.getEstadoActual() == EstadosJuego.PELEA){
+            tableroGUI.habilitarTablero(false);
+        }else if (juego.getEstadoActual() == EstadosJuego.PREPARACION) {
+            tableroGUI.habilitarTablero(true);
+        }
+        if (juego.getEstadoActual()== EstadosJuego.FIN_DE_RONDA){
+         subeXp(2);
+         tiendaGUI.actualizarTiendaGui();
+        }
         labelEsperando.setEnabled(false);
         labelEsperando.setVisible(false);
         juego.cambiarListosNull();
         botonRonda.setEnabled(true);
+    }
+
+    @Override
+    public void actualizarTiempo(int segundos) {
+        labelTemporizador.setText("Tiempo restante: " + segundos + "s");
     }
 
     @Override

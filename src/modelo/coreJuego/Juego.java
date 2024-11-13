@@ -6,6 +6,9 @@ import vista.coreJuegoGUI.TableroGUI;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class Juego {
     private int fase = 1;
@@ -15,8 +18,9 @@ public class Juego {
     private Tienda tienda;
     private ArrayList<Jugador> ordenDeRivales;
     private int indiceRival;
-    private ArrayList<Observador> observadores = new ArrayList<>();
     private EstadosJuego estadoActual = EstadosJuego.INICIO_PARTIDA;
+    private Timer timer;
+    private ArrayList<Observador> observadores = new ArrayList<>();
 
     public Juego(Tienda tienda) {
         this.jugadores = new ArrayList<>();
@@ -35,7 +39,24 @@ public class Juego {
     public void iniciarPreparacion() {
         estadoActual = EstadosJuego.PREPARACION;
         notificarObservadores();
-        rondas();
+        iniciarTemporizador();
+    }
+
+    private void iniciarTemporizador() {
+        if (timer != null) {
+            timer.stop();
+        }
+        timer = new Timer(1000, new ActionListener() {
+            private int tiempoRestante = 15;
+            @Override public void actionPerformed(ActionEvent e) {
+                tiempoRestante--;
+                notificarTiempoRestante(tiempoRestante);
+                if (tiempoRestante <= 0) {
+                    ((Timer)e.getSource()).stop();
+                    comenzarPelea();
+                } } }
+        );
+        timer.start();
     }
 
     public void comenzarPelea() {
@@ -49,8 +70,6 @@ public class Juego {
         indiceRival = (indiceRival + 1) % ordenDeRivales.size();
         return rival;
     }
-
-    public void iniciarRonda(){Jugador rival = elegirSiguienteRival();}
 
     public void agregarJugador(Jugador jugador){jugadores.add(jugador);}
 
@@ -103,25 +122,34 @@ public class Juego {
     }
 
     public void iniciarRondaPvp() {
-       for (int i = 0; i < jugadores.size(); i++) {
-           Jugador jugador1 = jugadores.get(i);
-           Jugador jugador2 = jugadores.get((i + 1) % jugadores.size());
-           transferirFichasPvp(jugador1, jugador2);
-       }
+        for (int i = 0; i < jugadores.size(); i++) {
+            Jugador jugador1 = jugadores.get(i);
+            Jugador jugador2 = jugadores.get((i + 1) % jugadores.size());
+
+            transferirFichasPvp(jugador1, jugador2);
+            transferirFichasPvp(jugador2, jugador1);
+
+            Combate combateJugador1 = new Combate(jugador1.getTablero().getTableroCore(), jugador2.getTablero().getTableroCore());
+            Combate combateJugador2 = new Combate(jugador2.getTablero().getTableroCore(), jugador1.getTablero().getTableroCore());
+
+            combateJugador1.iniciarCombate();
+            combateJugador2.iniciarCombate();
+        }
     }
 
     private void transferirFichasPvp(Jugador jugador1, Jugador jugador2) {
-        TableroGUI tablero1 = jugador1.getTablero();
-        TableroGUI tablero2 = jugador2.getTablero();
-        tablero1.limpiarTableroEnemigo();
+        TableroGUI tableroDestino = jugador1.getTablero();
+        TableroGUI tableroOrigen = jugador2.getTablero();
+        tableroDestino.limpiarTableroEnemigo();
 
         for (int fila = 3; fila <= 5; fila++) {
             for (int columna = 0; columna <= 5; columna++) {
-                if (tablero2.estaCeldaOcupada(fila, columna)) {
-                    FichaClickeableGUI ficha = tablero2.getFichaEnCelda(fila, columna);
+                if (tableroOrigen.estaCeldaOcupada(fila, columna)) {
+                    FichaClickeableGUI ficha = tableroOrigen.getFichaEnCelda(fila, columna);
                     ficha.getFicha().esFichaEnemiga();
                     int filaOpuesta = 5 - fila;
-                    tablero1.añadirAlTableroPorCoor(filaOpuesta, columna, ficha.getFicha());
+                    int columnaOpuesta = 5 - columna;
+                    tableroDestino.añadirAlTableroPorCoor(filaOpuesta, columnaOpuesta, ficha.getFicha());
                 }
             }
         }
@@ -130,6 +158,34 @@ public class Juego {
     public int getFase(){return this.fase;}
 
     public int getRonda(){return this.ronda;}
+
+    public EstadosJuego getEstadoActual(){return this.estadoActual;}
+
+    public void iniciarRonda() {iniciarPreparacion();}
+
+    public void finDeRonda() {
+        estadoActual = EstadosJuego.FIN_DE_RONDA;
+        notificarObservadores();
+        if (verificarFinPartida()) {
+            finDePartida();
+        } else {
+            subirRonda();
+            iniciarPreparacion();
+        }
+    }
+
+    public void finDePartida() {
+        estadoActual = EstadosJuego.FIN_PARTIDA;
+        notificarObservadores();
+    }
+
+    private boolean verificarFinPartida() {
+        int jugadoresConVida = 0;
+        for (Jugador jugador : jugadores) {
+                jugadoresConVida++;
+        }
+        return jugadoresConVida <= 1;
+    }
 
     public void rondas(){
         if (fase == 1){
@@ -189,14 +245,14 @@ public class Juego {
     public void notificarObservadores() {
         for (Observador observador : observadores) {
                         observador.actualizarRasgos();
-                        observador.notificar();
+                        observador.notificarRonda();
         }
     }
 
 
-    public void notificar() {
+    public void notificarRonda() {
         for (Observador observador : observadores) {
-            observador.notificar();
+            observador.notificarRonda();
         }
     }
 
@@ -212,6 +268,11 @@ public class Juego {
         }
     }
 
+    public void notificarTiempoRestante(int segundos) {
+        for (Observador observador : observadores) {
+            observador.actualizarTiempo(segundos);
+        }
+    }
 
 }
 

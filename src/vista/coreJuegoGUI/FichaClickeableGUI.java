@@ -21,7 +21,6 @@ public class FichaClickeableGUI extends JLabel {
     private boolean animacionActiva = false;
     private JPanel barraVida;
     private JPanel barraMana;
-    //private Tablero tablero;
     private BancaGUI banca;
 
     public FichaClickeableGUI(Ficha ficha) {
