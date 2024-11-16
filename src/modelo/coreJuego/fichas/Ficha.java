@@ -5,7 +5,7 @@ import modelo.coreJuego.Tablero;
 import java.awt.*;
 import javax.swing.ImageIcon;
 
-public class Ficha {
+public class Ficha implements Runnable {
     private String nombre;
     private String nombreOriginal;
     private Rasgo rasgo1;
@@ -89,18 +89,43 @@ public class Ficha {
 
     public int getCosteAnterior(){return costeAnterior;}
 
-    public void recibirDaño(int cantidad) {
-        estadisticas.reducirVida(cantidad);
-        if (estadisticas.getVidaActual() < 0) estadisticas.setVidaActual(0);
-    }
-
     public FichaEstadisticas getEstadisticas(){return this.estadisticas;}
 
     public FichaMovimiento getMovimiento(){return this.movimiento;}
 
     public boolean estaViva() {return estadisticas.getVida() > 0;}
 
+    public void run() {
+        while (estaViva() && !tablero.verificarFinDeCombate()) {
+            try {
+                Ficha enemigo = movimiento.buscarEnemigoCercano(tablero.getTablero(), movimiento.getFila(), movimiento.getColumna());
+                if (enemigo != null && movimiento.estaEnAlcance(enemigo)) {
+                    atacar(enemigo);
+                    if (!enemigo.estaViva()) {
+                        tablero.eliminarFicha(enemigo);
+                    }
+                } else {
+                    // si no hay enemigos en alcance, moverse hacia el enemigo mas cercano
+                    //movimiento.moverHacia(tablero, this);
+                    movimiento.moverHaciaConBFS(tablero, this);
+                }
+                // espera antes del siguiente movimiento/ataque
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+
+    public synchronized void recibirDaño(int danño) {estadisticas.reducirVida(danño);}
+
     public void atacar(Ficha enemigo) {
+        if (enemigo != null) {
+            enemigo.recibirDaño(estadisticas.getDanoFisico());
+        }
+    }
+
+    /*public void atacar(Ficha enemigo) {
         enemigo.getEstadisticas().reducirVida(this.estadisticas.getDanoFisico());
         if (this.estadisticas.getManaActual() == this.estadisticas.getCosteUlti()){
             this.estadisticas.setManaActual(0);
@@ -115,7 +140,7 @@ public class Ficha {
                 atacar(nuevoEnemigo);
             }
         }
-    }
+    }*/
 
     public String getNombre() { return nombre; }
 

@@ -1,5 +1,10 @@
 package modelo.coreJuego.fichas;
 
+import modelo.coreJuego.Tablero;
+
+import java.util.LinkedList;
+import java.util.Queue;
+
 public class FichaMovimiento {
     private int filaOriginal;
     private int columnaOriginal;
@@ -11,29 +16,77 @@ public class FichaMovimiento {
         this.alcance = alcance;
     }
 
+    public void moverHaciaConBFS(Tablero tablero, Ficha ficha) {
+        int filas = tablero.getTablero().length;
+        int columnas = tablero.getTablero()[0].length;
+        // direcciones para moverse (arriba, derecha, abajo, izquierda)
+        int[] dFila = {-1, 0, 1, 0};
+        int[] dColumna = {0, 1, 0, -1};
+        // cola para BFS (cada entrada es {fila, columna, pasos})
+        Queue<int[]> cola = new LinkedList<>();
+        cola.add(new int[]{fila, columna, 0}); // posicion inicial de la ficha
+        // matriz para marcar celdas visitadas
+        boolean[][] visitado = new boolean[filas][columnas];
+        visitado[fila][columna] = true;
+        while (!cola.isEmpty()) {
+            int[] actual = cola.poll();
+            int f = actual[0];
+            int c = actual[1];
+            // verifica si encontramos un enemigo
+            if (tablero.getTablero()[f][c] != null && tablero.getTablero()[f][c].getFichaEnemiga()) {
+                // Mueve la ficha un paso hacia esa dirección
+                moverUnPasoHacia(f, c, tablero);
+                return;
+            }
+            // explora las celdas adyacentes
+            for (int i = 0; i < 4; i++) {
+                int nuevaFila = f + dFila[i];
+                int nuevaColumna = c + dColumna[i];
+
+                // comprueba límites y si la celda es válida para visitar
+                if (nuevaFila >= 0 && nuevaFila < filas && nuevaColumna >= 0 && nuevaColumna < columnas
+                        && !visitado[nuevaFila][nuevaColumna] && tablero.estaCeldaLibre(nuevaFila, nuevaColumna)) {
+                    visitado[nuevaFila][nuevaColumna] = true;
+                    cola.add(new int[]{nuevaFila, nuevaColumna, actual[2] + 1});
+                }
+            }
+        }
+    }
+
+    private void moverUnPasoHacia(int filaObjetivo, int columnaObjetivo, Tablero tablero) {
+        int deltaFila = Integer.compare(filaObjetivo, fila);
+        int deltaColumna = Integer.compare(columnaObjetivo, columna);
+        int nuevaFila = fila + deltaFila;
+        int nuevaColumna = columna + deltaColumna;
+
+        if (tablero.estaCeldaLibre(nuevaFila, nuevaColumna)) {
+            tablero.moverFichaCombate(fila, columna, nuevaFila, nuevaColumna);
+            fila = nuevaFila;
+            columna = nuevaColumna;
+        }
+    }
+
+    public void moverHacia(Tablero tablero, Ficha ficha) {
+        Ficha enemigo = buscarEnemigoCercano(tablero.getTablero(), getFila(),getColumna());
+        if (enemigo != null) {
+            int filaEnemigo = enemigo.getMovimiento().fila;
+            int colEnemigo = enemigo.getMovimiento().columna;
+
+            int nuevaFila = fila + Integer.compare(filaEnemigo, fila);
+            int nuevaColumna = columna + Integer.compare(colEnemigo, columna);
+
+            if (tablero.estaCeldaLibre(nuevaFila, nuevaColumna)) {
+                tablero.moverFichaCombate(fila, columna, nuevaFila, nuevaColumna);
+                fila = nuevaFila;
+                columna = nuevaColumna;
+            }
+        }
+    }
+
     public boolean estaEnAlcance(Ficha enemigo) {
         int distanciaFila = Math.abs(this.fila - enemigo.getMovimiento().getFila());
         int distanciaColumna = Math.abs(this.columna - enemigo.getMovimiento().getColumna());
         return distanciaFila <= alcance && distanciaColumna <= alcance;
-    }
-
-    public void moverFichaHaciaEnemigo(Ficha[][] tablero, int filaActual, int colActual) {
-        Ficha enemigoCercano = buscarEnemigoCercano(tablero, filaActual, colActual);
-        if (enemigoCercano != null) {
-            int filaEnemigo = enemigoCercano.getMovimiento().getFila();
-            int colEnemigo = enemigoCercano.getMovimiento().getColumna();
-
-            // Intentar moverse hacia el enemigo evitando bloqueos
-            if (filaActual > filaEnemigo && puedeMoverAdelante(tablero)) {
-                moverAdelante();
-            } else if (colActual > colEnemigo && puedeMoverIzquierda(tablero)) {
-                moverIzquierda();
-            } else if (colActual < colEnemigo && puedeMoverDerecha(tablero)) {
-                moverDerecha();
-            } else if (filaActual < filaEnemigo && puedeMoverAtras(tablero)) {
-                moverAtras();
-            }
-        }
     }
 
     public Ficha buscarEnemigoCercano(Ficha[][] tablero, int filaActual, int colActual) {
@@ -73,18 +126,6 @@ public class FichaMovimiento {
         return alcance;
     }
 
-    public void moverAdelante(){
-        this.fila -= 1;
-    }
-
-    public void moverAtras(){
-        this.fila += 1;
-    }
-
-    public void moverIzquierda(){this.columna -= 1;}
-
-    public void moverDerecha(){this.columna += 1;}
-
     public int getFilaOriginal() {
         return filaOriginal;
     }
@@ -96,4 +137,8 @@ public class FichaMovimiento {
     public int getFila() {return fila;}
 
     public int getColumna() {return columna;}
+
+    public void cambiarFila(int x){this.fila=x;}
+
+    public void cambiarColumna(int y){this.columna=y;}
 }

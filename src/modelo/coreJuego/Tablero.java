@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.ExecutorService;
 
 public class Tablero {
     private Ficha[][] celdasTablero;
@@ -146,7 +149,73 @@ public class Tablero {
         return true;
     }
 
+    public synchronized void moverFichaCombate(int filaActual, int colActual, int nuevaFila, int nuevaCol) {
+        Ficha ficha = celdasTablero[filaActual][colActual];
+        celdasTablero[filaActual][colActual] = null;
+        celdasTablero[nuevaFila][nuevaCol] = ficha;
+        //ficha.getMovimiento().setPosicion(nuevaFila, nuevaCol);
+        ficha.getMovimiento().cambiarFila(nuevaFila);
+        ficha.getMovimiento().cambiarColumna(nuevaCol);
+    }
 
+    public boolean estaCeldaLibre(int fila, int columna) {
+        return fila >= 0 && fila < celdasTablero.length &&
+                columna >= 0 && columna < celdasTablero[0].length &&
+                celdasTablero[fila][columna] == null;
+    }
+
+    public synchronized void eliminarFicha(Ficha ficha) {celdasTablero[ficha.getMovimiento().getFila()][ficha.getMovimiento().getColumna()] = null;}
+
+    /*public void iniciarCombate() {
+        for (Ficha[] fila : celdasTablero) {
+            for (Ficha ficha : fila) {
+                if (ficha != null) {
+                    new Thread(ficha).start();
+                }
+            }
+        }
+    }*/
+
+    public boolean verificarFinDeCombate() {
+        boolean quedanAliadas = false;
+        boolean quedanEnemigas = false;
+        for (int fila = 0; fila < 6; fila++) {
+            for (int columna = 0; columna < 6; columna++) {
+                Ficha ficha = celdasTablero[fila][columna];
+                if (ficha != null) {
+                    if (ficha.getFichaEnemiga()) {
+                        quedanEnemigas = true;
+                    } else {
+                        quedanAliadas = true; }
+                }
+            }
+             if (quedanAliadas && quedanEnemigas) {
+                 return false;
+             }
+        }
+    return !quedanAliadas || !quedanEnemigas;
+    }
+
+    public void iniciarCombate(ExecutorService poolDeFichas) {
+        for (Ficha[] fila : celdasTablero) {
+            for (Ficha ficha : fila) {
+                if (ficha != null) {
+                    poolDeFichas.submit(ficha); // ejecuta la lógica de cada ficha
+                }
+            }
+        }
+    }
+
+    public boolean equipoEliminado() {
+        for (Ficha[] fila : celdasTablero) {
+            for (Ficha ficha : fila) {
+                if (ficha != null && ficha.estaViva()) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 
     public boolean estaCeldaOcupada(int x,int y){return celdasTablero[x][y] != null;}
 

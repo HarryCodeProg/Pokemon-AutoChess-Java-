@@ -1,60 +1,54 @@
 package modelo.coreJuego;
 
-import modelo.coreJuego.fichas.Ficha;
+import modelo.coreJuego.Tablero;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Combate {
-    private final Tablero tableroJugador;
-    private final Tablero tableroEnemigo;
+    private Tablero tableroJugador;
+    private Tablero tableroEnemigo;
+    private boolean combateTerminado = false;
+
+    private ExecutorService poolDeFichas; // maneja los hilos de las fichas
 
     public Combate(Tablero tableroJugador, Tablero tableroEnemigo) {
         this.tableroJugador = tableroJugador;
         this.tableroEnemigo = tableroEnemigo;
+        this.poolDeFichas = Executors.newCachedThreadPool();
     }
 
     public void iniciarCombate() {
-        // Iterar sobre las fichas del jugador para atacar o moverse hacia fichas enemigas
-        for (int fila = 3; fila <= 5; fila++) {
-            for (int columna = 0; columna <= 5; columna++) {
-                if (tableroJugador.estaCeldaOcupada(fila, columna)) {
-                    Ficha fichaJugador = tableroJugador.getFichaEnCelda(fila, columna);
-                    manejarAccionDeFicha(fichaJugador, tableroEnemigo);
-                }
-            }
-        }
+        // iniciar el combate en ambos tableros
+        tableroJugador.iniciarCombate(poolDeFichas);
+        tableroEnemigo.iniciarCombate(poolDeFichas);
 
-        // Iterar sobre las fichas del enemigo para atacar fichas aliadas
-        for (int fila = 0; fila <= 2; fila++) {
-            for (int columna = 0; columna <= 5; columna++) {
-                if (tableroEnemigo.estaCeldaOcupada(fila, columna)) {
-                    Ficha fichaEnemiga = tableroEnemigo.getFichaEnCelda(fila, columna);
-                    manejarAccionDeFicha(fichaEnemiga, tableroJugador);
-                }
-            }
-        }
-
-        verificarFinDePelea();
+        // monitorear el estado del combate
+        new Thread(this::monitorearCombate).start();
     }
 
-    private void manejarAccionDeFicha(Ficha ficha, Tablero tableroOponente) {
-        Ficha enemigo = ficha.getMovimiento().buscarEnemigoCercano(tableroOponente.getTablero(), ficha.getMovimiento().getFila(), ficha.getMovimiento().getColumna());
+    private void monitorearCombate() {
+        while (!combateTerminado) {
+            // verificar si queda un solo equipo con fichas vivas
+            if (tableroJugador.equipoEliminado() || tableroEnemigo.equipoEliminado()) {
+                combateTerminado = true;
+                poolDeFichas.shutdownNow(); // detener todos los hilos
+                anunciarGanador();
+            }
 
-        if (enemigo != null) {
-            if (ficha.getMovimiento().estaEnAlcance(enemigo)) {
-                ficha.atacar(enemigo);
-                if (!enemigo.estaViva()) {
-                    tableroOponente.eliminarFicha(enemigo.getMovimiento().getFila(), enemigo.getMovimiento().getColumna());
-                }
-            } else {
-                ficha.getMovimiento().moverFichaHaciaEnemigo(tableroOponente.getTablero(), ficha.getMovimiento().getFila(), ficha.getMovimiento().getColumna());
+            try {
+                Thread.sleep(500); // reducir la carga del monitoreo
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
         }
     }
 
-    private void verificarFinDePelea() {
-        if (tableroJugador.noTieneFichas()) {
-            System.out.println("El jugador ha perdido la pelea.");
-        } else if (tableroEnemigo.noTieneFichas()) {
-            System.out.println("El enemigo ha perdido la pelea.");
+    private void anunciarGanador() {
+        if (tableroJugador.equipoEliminado()) {
+            System.out.println("¡El enemigo ganó el combate!");
+        } else if (tableroEnemigo.equipoEliminado()) {
+            System.out.println("¡El jugador ganó el combate!");
         }
     }
 }

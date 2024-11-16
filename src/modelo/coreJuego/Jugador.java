@@ -56,9 +56,7 @@ public class Jugador implements Serializable {
         return this.vida;
     }
 
-    public void sumarVida(int cantidad) {
-        this.vida += cantidad;
-    }
+    public void sumarVida(int cantidad) {this.vida += cantidad;}
 
     public void restarVida(int cantidad) {
         this.vida -= cantidad;

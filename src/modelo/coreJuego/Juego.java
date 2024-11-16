@@ -127,13 +127,9 @@ public class Juego {
             Jugador jugador2 = jugadores.get((i + 1) % jugadores.size());
 
             transferirFichasPvp(jugador1, jugador2);
-            transferirFichasPvp(jugador2, jugador1);
 
-            Combate combateJugador1 = new Combate(jugador1.getTablero().getTableroCore(), jugador2.getTablero().getTableroCore());
-            Combate combateJugador2 = new Combate(jugador2.getTablero().getTableroCore(), jugador1.getTablero().getTableroCore());
-
-            combateJugador1.iniciarCombate();
-            combateJugador2.iniciarCombate();
+            Combate combate = new Combate(jugador1.getTablero().getTableroCore(), jugador2.getTablero().getTableroCore());
+            combate.iniciarCombate();
         }
     }
 
