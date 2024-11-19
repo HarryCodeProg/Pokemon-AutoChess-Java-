@@ -17,8 +17,12 @@ public class Tablero {
     private int cantidadMaximaTablero;
     private Map<Rasgo, Integer> contadorRasgos = new HashMap<>();
     private Banca banca;
+    private int numeroEquipo;
+    private Tablero tableroEnemigo;
 
     public Tablero() {celdasTablero = new Ficha[6][6];}
+
+    public void setNumeroEquipo(int nro){this.numeroEquipo = nro;}
 
     public Ficha[][] getTablero() {return celdasTablero;}
 
@@ -153,7 +157,6 @@ public class Tablero {
         Ficha ficha = celdasTablero[filaActual][colActual];
         celdasTablero[filaActual][colActual] = null;
         celdasTablero[nuevaFila][nuevaCol] = ficha;
-        //ficha.getMovimiento().setPosicion(nuevaFila, nuevaCol);
         ficha.getMovimiento().cambiarFila(nuevaFila);
         ficha.getMovimiento().cambiarColumna(nuevaCol);
     }
@@ -176,24 +179,22 @@ public class Tablero {
         }
     }*/
 
-    public boolean verificarFinDeCombate() {
+    public synchronized boolean verificarFinDeCombate() {
         boolean quedanAliadas = false;
         boolean quedanEnemigas = false;
-        for (int fila = 0; fila < 6; fila++) {
-            for (int columna = 0; columna < 6; columna++) {
-                Ficha ficha = celdasTablero[fila][columna];
+
+        for (Ficha[] fila : celdasTablero) {
+            for (Ficha ficha : fila) {
                 if (ficha != null) {
-                    if (ficha.getFichaEnemiga()) {
+                    if (ficha.getEquipo() != numeroEquipo && ficha.estaViva()) {
                         quedanEnemigas = true;
-                    } else {
-                        quedanAliadas = true; }
+                    } else if (ficha.getEquipo() == numeroEquipo && ficha.estaViva()) {
+                        quedanAliadas = true;
+                    }
                 }
             }
-             if (quedanAliadas && quedanEnemigas) {
-                 return false;
-             }
         }
-    return !quedanAliadas || !quedanEnemigas;
+        return !(quedanAliadas && quedanEnemigas); // termina si solo queda un equipo
     }
 
     public void iniciarCombate(ExecutorService poolDeFichas) {
@@ -216,6 +217,10 @@ public class Tablero {
         }
         return true;
     }
+
+    public void setTableroEnemigo(Tablero enemigo) {this.tableroEnemigo = enemigo;}
+
+    public Tablero getTableroEnemigo() {return tableroEnemigo;}
 
     public boolean estaCeldaOcupada(int x,int y){return celdasTablero[x][y] != null;}
 

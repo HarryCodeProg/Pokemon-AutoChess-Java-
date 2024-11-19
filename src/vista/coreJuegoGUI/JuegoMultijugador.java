@@ -16,8 +16,8 @@ public class JuegoMultijugador {
 
     public static void main(String[] args) {
         Tienda tienda = new Tienda();
-        Jugador jugador1 = new Jugador("Jugador 1");
-        Jugador jugador2 = new Jugador("Jugador 2");
+        Jugador jugador1 = new Jugador("Jugador 1",1);
+        Jugador jugador2 = new Jugador("Jugador 2",2);
         llenarListaJugadores(jugador1);
         llenarListaJugadores(jugador2);
 

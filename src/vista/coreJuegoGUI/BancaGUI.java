@@ -17,10 +17,12 @@ public class BancaGUI extends JPanel{
     private ArrayList<Observador> observadores;
     private TableroGUI tablero;
     private Banca bancaCore;
+    private int nroEquipo;
 
- public BancaGUI(){
+ public BancaGUI(int nro){
      setLayout(new BorderLayout());
      this.bancaCore = new Banca();
+     this.nroEquipo = nro;
 
      JPanel panelBanca = inicializarBanca();
      panelBanca.setOpaque(false);
@@ -59,6 +61,8 @@ public class BancaGUI extends JPanel{
         }
         return panelBanca;
     }
+
+    public int getNroEquipo(){return this.nroEquipo;}
 
     private void moverFichaEnBanca(int nuevaPosicion) {
         for (int i = 0; i < celdasBanca.length; i++) {

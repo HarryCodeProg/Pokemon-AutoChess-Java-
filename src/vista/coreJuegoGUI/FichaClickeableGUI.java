@@ -48,35 +48,26 @@ public class FichaClickeableGUI extends JLabel {
         add(panelBarras,BorderLayout.NORTH);
 
         addMouseListener(new MouseAdapter() {
-           /* @Override
-            public void mousePressed(MouseEvent e) {
-                if (SwingUtilities.isLeftMouseButton(e)) {
-                    iniciarArrastre(e);
-                }
-            }*/
-
-           /* @Override
-            public void mouseReleased(MouseEvent e) {
-                if (enArrastre) {
-                    finalizarArrastre(e);
-                }
-            }*/
 
             @Override
             public void mouseClicked(MouseEvent e) {
                 if (SwingUtilities.isRightMouseButton(e)) {
                     mostrarStatsFicha();
                 }else if (SwingUtilities.isLeftMouseButton(e)) {
-                    //bTablero.seleccionarFicha(FichaClickeableGUI.this);
-                    banca.seleccionarFicha(FichaClickeableGUI.this);
+                    if (banca != null){
+                     if (banca.getNroEquipo() != ficha.getEquipo()){
+                        banca.seleccionarFicha(FichaClickeableGUI.this);
+                     }else{
+
+                     }
+                    }
+
                 }
             }
         });
     }
 
-    public void setBanca(BancaGUI banca){
-        this.banca = banca;
-    }
+    public void setBanca(BancaGUI banca){this.banca = banca;}
 
    /* public void setTab(Tablero tab){
         this.tablero = tab;
@@ -170,11 +161,16 @@ public class FichaClickeableGUI extends JLabel {
         barraVida.removeAll();
         barraVida.setLayout(new BorderLayout());
         JPanel vidaActual = new JPanel();
-        if(this.ficha.getFichaEnemiga()){
-            vidaActual.setBackground(Color.RED);
+        if(this.banca != null){
+            if(this.ficha.getEquipo() != banca.getNroEquipo()){
+                vidaActual.setBackground(Color.RED);
+            }else{
+                vidaActual.setBackground(Color.GREEN);
+            }
         }else{
             vidaActual.setBackground(Color.GREEN);
         }
+
         vidaActual.setPreferredSize(new Dimension(anchoBarraVida, barraVida.getPreferredSize().height));
 
         JPanel vidaRestante = new JPanel();

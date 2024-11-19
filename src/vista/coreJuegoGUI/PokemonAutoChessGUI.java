@@ -64,7 +64,7 @@ public class PokemonAutoChessGUI extends JFrame implements Observador {
         this.tienda = tiendax;
         this.jugador = jugadorN;
         tiendaGUI = new TiendaGUI(tienda,jugador);
-        bancaGUI = new BancaGUI();
+        bancaGUI = new BancaGUI(jugador.getNumeroEquipo());
         tableroGUI = jugador.getTablero();
         bancaGUI.getBancaCore().setTablero(tableroGUI.getTableroCore());
         tableroGUI.getTableroCore().setBanca(bancaGUI.getBancaCore());

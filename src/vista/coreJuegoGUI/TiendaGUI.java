@@ -220,6 +220,7 @@ public class TiendaGUI extends JPanel{
                          actualizarLabelMonedas();
 
                          FichaClickeableGUI fichaClickeableGUI = new FichaClickeableGUI(ficha);
+                         ficha.setEquipo(jugador.getNumeroEquipo());
 
                          fichaClickeableGUI.setBanca(jugador.getBanca());
 

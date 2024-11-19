@@ -85,7 +85,7 @@ public class TableroGUI extends JPanel{
     public void añadirAlTableroPorCoor(int x, int y, Ficha ficha){
         if (!estaCeldaOcupada(x, y)){
             FichaClickeableGUI fichagui = new FichaClickeableGUI(ficha);
-            fichagui.setBanca(banca);
+            //fichagui.setBanca(banca);
             fichagui.getFicha().getMovimiento().setFila(x);
             fichagui.getFicha().getMovimiento().setColumna(x);
             this.celdasTablero[x][y].add(fichagui);

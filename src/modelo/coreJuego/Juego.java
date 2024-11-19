@@ -133,7 +133,7 @@ public class Juego {
         }
     }
 
-    private void transferirFichasPvp(Jugador jugador1, Jugador jugador2) {
+    /*private void transferirFichasPvp(Jugador jugador1, Jugador jugador2) {
         TableroGUI tableroDestino = jugador1.getTablero();
         TableroGUI tableroOrigen = jugador2.getTablero();
         tableroDestino.limpiarTableroEnemigo();
@@ -142,10 +142,29 @@ public class Juego {
             for (int columna = 0; columna <= 5; columna++) {
                 if (tableroOrigen.estaCeldaOcupada(fila, columna)) {
                     FichaClickeableGUI ficha = tableroOrigen.getFichaEnCelda(fila, columna);
-                    ficha.getFicha().esFichaEnemiga();
+
                     int filaOpuesta = 5 - fila;
                     int columnaOpuesta = 5 - columna;
                     tableroDestino.añadirAlTableroPorCoor(filaOpuesta, columnaOpuesta, ficha.getFicha());
+                }
+            }
+        }
+    }*/
+
+    private void transferirFichasPvp(Jugador jugador1, Jugador jugador2) {
+        TableroGUI tableroDestino = jugador1.getTablero();
+        TableroGUI tableroOrigen = jugador2.getTablero();
+        tableroDestino.limpiarTableroEnemigo();
+
+        for (int fila = 3; fila <= 5; fila++) {
+            for (int columna = 0; columna <= 5; columna++) {
+                FichaClickeableGUI ficha = tableroOrigen.getFichaEnCelda(fila, columna);
+                if (ficha != null) {
+                    int filaOpuesta = 5 - fila;
+                    int columnaOpuesta = 5 - columna;
+                    if (!tableroDestino.estaCeldaOcupada(filaOpuesta, columnaOpuesta)) {
+                        tableroDestino.añadirAlTableroPorCoor(filaOpuesta, columnaOpuesta, ficha.getFicha());
+                    }
                 }
             }
         }

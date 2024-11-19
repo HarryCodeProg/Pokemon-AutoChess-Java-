@@ -15,6 +15,8 @@ public class Combate {
     public Combate(Tablero tableroJugador, Tablero tableroEnemigo) {
         this.tableroJugador = tableroJugador;
         this.tableroEnemigo = tableroEnemigo;
+        this.tableroJugador.setTableroEnemigo(tableroEnemigo);
+        this.tableroEnemigo.setTableroEnemigo(tableroJugador);
         this.poolDeFichas = Executors.newCachedThreadPool();
     }
 
@@ -29,15 +31,15 @@ public class Combate {
 
     private void monitorearCombate() {
         while (!combateTerminado) {
-            // verificar si queda un solo equipo con fichas vivas
             if (tableroJugador.equipoEliminado() || tableroEnemigo.equipoEliminado()) {
-                combateTerminado = true;
-                poolDeFichas.shutdownNow(); // detener todos los hilos
-                anunciarGanador();
+                synchronized (this) {
+                    combateTerminado = true;
+                    poolDeFichas.shutdownNow(); // detener todos los hilos
+                    anunciarGanador();
+                }
             }
-
             try {
-                Thread.sleep(500); // reducir la carga del monitoreo
+                Thread.sleep(500);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }

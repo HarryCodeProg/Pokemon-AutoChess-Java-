@@ -19,8 +19,9 @@ public class Ficha implements Runnable {
     private FichaImagen imagen;
     private String nombreEvolucion1;
     private String nombreEvolucion2;
-    private boolean fichaEnemiga = false;
+    //private boolean fichaEnemiga = false;
     private Tablero tablero;
+    private int equipo;
 
 
     public Ficha(String nombre, Rasgo rasgo1, Rasgo rasgo2, Rasgo rasgo3, int coste,int mov,int vida,int costeU ,int danoFisico, int dañoAP, int defensaFisica, int defensaAP,String rutaImagen,String rutaSprite) {
@@ -98,30 +99,37 @@ public class Ficha implements Runnable {
     public void run() {
         while (estaViva() && !tablero.verificarFinDeCombate()) {
             try {
-                Ficha enemigo = movimiento.buscarEnemigoCercano(tablero.getTablero(), movimiento.getFila(), movimiento.getColumna());
+                Ficha enemigo = movimiento.buscarEnemigoCercano(tablero.getTablero(), movimiento.getFila(), movimiento.getColumna(), this);
+
                 if (enemigo != null && movimiento.estaEnAlcance(enemigo)) {
+                    // si hay un enemigo en alcance, ataca
                     atacar(enemigo);
                     if (!enemigo.estaViva()) {
-                        tablero.eliminarFicha(enemigo);
+                        tablero.eliminarFicha(enemigo); // elimina del tablero si muere
                     }
                 } else {
-                    // si no hay enemigos en alcance, moverse hacia el enemigo mas cercano
-                    //movimiento.moverHacia(tablero, this);
+                    // si no hay enemigos en alcance, usa BFS para moverse
                     movimiento.moverHaciaConBFS(tablero, this);
                 }
-                // espera antes del siguiente movimiento/ataque
-                Thread.sleep(1000);
+
+                // espera entre acciones
+                Thread.sleep(500); // delay
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         }
     }
 
-    public synchronized void recibirDaño(int danño) {estadisticas.reducirVida(danño);}
-
     public void atacar(Ficha enemigo) {
         if (enemigo != null) {
             enemigo.recibirDaño(estadisticas.getDanoFisico());
+        }
+    }
+
+    public synchronized void recibirDaño(int dano) {
+        estadisticas.reducirVida(dano);
+        if (!estaViva()) {
+            tablero.eliminarFicha(this);
         }
     }
 
@@ -156,9 +164,9 @@ public class Ficha implements Runnable {
 
     public Rasgo[] getRasgos() {return new Rasgo[]{rasgo1, rasgo2, rasgo3};}
 
-    public void esFichaEnemiga(){this.fichaEnemiga = true;}
+    public void setEquipo(int equipo) {this.equipo = equipo;}
 
-    public boolean getFichaEnemiga() {return fichaEnemiga;}
+    public int getEquipo() {return equipo;}
 
     public FichaImagen getFichaImagen(){return this.imagen;}
 

@@ -17,14 +17,19 @@ public class Jugador implements Serializable {
     private TableroGUI tablero;
     private Tablero tableroCore;
     private Banca bancaCore;
+    private int numeroEquipo;
 
-    public Jugador(String nombreS) {
+    public Jugador(String nombreS,int nroEquipo) {
         this.nombre = nombreS;
         this.vida = 100;
         this.listoParaRonda = false;
         this.tableroCore = new Tablero();
         tablero = new TableroGUI(tableroCore);
+        this.numeroEquipo = nroEquipo;
+        tableroCore.setNumeroEquipo(numeroEquipo);
     }
+
+    public int getNumeroEquipo(){return this.numeroEquipo;}
 
     public int getNivel() {
         return this.nivelJugador;
